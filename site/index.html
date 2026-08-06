@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Knowledge Canvas — bản đồ tri thức, kỹ năng và dự án cá nhân." />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Knowledge Canvas</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <aside class="sidebar" aria-label="Điều hướng knowledge map">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">K</span>
+        <div>
+          <strong>Knowledge Canvas</strong>
+          <small>Personal engineering map</small>
+        </div>
+      </div>
+
+      <section class="sidebar-section">
+        <h2>Lĩnh vực</h2>
+        <div id="area-filters"></div>
+      </section>
+
+      <section class="sidebar-section">
+        <h2>Trạng thái</h2>
+        <div id="status-filters"></div>
+      </section>
+
+      <button id="reset-view" class="reset-button" type="button">↺ Đặt lại view</button>
+    </aside>
+
+    <main class="workspace">
+      <header class="toolbar">
+        <label class="search-box">
+          <span aria-hidden="true">⌕</span>
+          <input id="search-input" type="search" placeholder="Tìm topic, tag hoặc dự án..." autocomplete="off" />
+          <kbd>⌘K</kbd>
+        </label>
+        <div class="toolbar__stats"><strong id="visible-count">0</strong> / <span id="total-count">0</span> nodes</div>
+      </header>
+
+      <section id="canvas" class="canvas" aria-label="Knowledge graph canvas">
+        <div id="scene" class="scene">
+          <svg id="edges-layer" class="edges-layer" aria-hidden="true"></svg>
+          <div id="nodes-layer" class="nodes-layer"></div>
+        </div>
+
+        <div class="canvas-controls" aria-label="Canvas controls">
+          <button id="zoom-in" type="button" title="Phóng to">+</button>
+          <button id="zoom-out" type="button" title="Thu nhỏ">−</button>
+          <button id="fit-view" type="button" title="Fit view">⌗</button>
+        </div>
+
+        <div class="canvas-hint">Kéo nền để di chuyển · Lăn chuột để zoom · Kéo node để tinh chỉnh</div>
+        <div class="canvas-legend">
+          <span><i class="legend-line legend-line--requires"></i> prerequisite</span>
+          <span><i class="legend-line legend-line--related"></i> related</span>
+          <span><i class="legend-line legend-line--applied"></i> applied in</span>
+        </div>
+      </section>
+    </main>
+
+    <aside id="inspector" class="inspector" aria-live="polite"></aside>
+  </div>
+
+  <template id="empty-inspector-template">
+    <div class="inspector-empty">
+      <span class="inspector-empty__icon">◎</span>
+      <strong>Chọn một node</strong>
+      <p>Xem mô tả, quan hệ, tag và bằng chứng đã áp dụng.</p>
+    </div>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
