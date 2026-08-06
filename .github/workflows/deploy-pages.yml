@@ -30,7 +30,9 @@ jobs:
         run: python scripts/validate_data.py
 
       - name: Validate JavaScript syntax
-        run: node --check site/app.js
+        run: |
+          node --check site/app.js
+          node --check site/polish.js
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
