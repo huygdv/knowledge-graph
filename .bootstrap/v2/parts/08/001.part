@@ -1,0 +1,114 @@
+    if (!S.visible.has(edge.source) || !S.visible.has(edge.target)) continue;
+    const source = S.positions.get(edge.source);
+    const target = S.positions.get(edge.target);
+    const sourceNode = byId(edge.source);
+    const x1 = source.x + nodeWidth(sourceNode);
+    const y1 = source.y + 54;
+    const x2 = target.x;
+    const y2 = target.y + 54;
+    const control = Math.max(58, Math.abs(x2 - x1) * 0.43);
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', `M ${x1} ${y1} C ${x1 + control} ${y1}, ${x2 - control} ${y2}, ${x2} ${y2}`);
+    path.setAttribute('class', `edge edge--${edge.kind.replace('_', '-')}`);
+    E.edges.append(path);
+  }
+}
+
+function breadcrumb(nodeId) { return [...ancestors(nodeId), nodeId].map((id) => byId(id)?.title).filter(Boolean).join(' › '); }
+function relationRows(node) {
+  const rows = [];
+  for (const edge of S.graph.edges) {
+    let other; let label;
+    if (edge.source === node.id) { other = byId(edge.target); label = RELATION[edge.kind][0]; }
+    else if (edge.target === node.id) { other = byId(edge.source); label = RELATION[edge.kind][1]; }
+    else continue;
+    if (!other) continue;
+    rows.push(`<button data-go="${esc(other.id)}"><strong>${esc(other.title)}</strong><span>→</span><small>${esc(label)}</small></button>`);
+  }
+  return rows.length ? rows.join('') : '<p class="muted">Chưa có quan hệ trực tiếp.</p>';
+}
+function careerMatrix(nodeId) {
+  const rows = [];
+  for (const level of S.profile.levels) {
+    const req = level.requirements.find((item) => item.nodeId === nodeId);
+    if (!req) continue;
+    rows.push(`<div class="matrix-row"><span>${esc(level.title)}</span><strong>M${req.expectedMastery}</strong><small>${esc(req.outcome)}</small></div>`);
+  }
+  return rows.length ? rows.join('') : '<p class="muted">Node này chưa nằm trong Backend Engineer profile.</p>';
+}
+function renderInspector() {
+  const node = byId(S.selected);
+  if (!node) { E.inspector.innerHTML = $('#empty-inspector-template').innerHTML; return; }
+  const assessment = S.assessments.get(node.id);
+  const req = requirementMap().get(node.id);
+  const evidence = node.kind === 'artifact' ? linkedKnowledge(node.id) : linkedArtifacts(node.id);
+  const current = assessment?.mastery ?? 0;
+  const gap = req ? current - req.expectedMastery : null;
+  E.inspector.innerHTML = `<button class="inspector__close" type="button">×</button><div class="eyebrow">${esc(breadcrumb(node.id))}</div><h1>${esc(node.title)}</h1><div class="badge-row"><span class="kind-badge">${KIND[node.kind].label}</span><span class="depth-badge">Depth ${S.depth.get(node.id) || 0}</span>${assessment ? `<span class="mastery-badge mastery-${assessment.mastery}">M${assessment.mastery} ${esc(mastery(assessment.mastery).label)}</span>` : ''}</div><p class="inspector__summary">${esc(node.summary)}</p><section><h2>Canonical knowledge</h2><div class="tag-list">${(node.tags || []).map((tag) => `<span>#${esc(tag)}</span>`).join('') || '<span>Chưa gắn tag</span>'}</div></section><section><h2>Personal overlay</h2>${assessment ? `<div class="mastery-card"><strong>M${assessment.mastery} · ${esc(mastery(assessment.mastery).label)}</strong><p>${esc(assessment.note || 'Public seed assessment; refine through daily use.')}</p><small>Updated ${esc(assessment.updatedAt)}</small></div>` : '<p class="muted">Chưa có public assessment. Canonical node vẫn tồn tại độc lập.</p>'}</section>${req ? `<section><h2>${esc(S.profile.role)} · ${esc(S.careerLevel)}</h2><div class="career-card ${gap < 0 ? 'career-card--gap' : ''}"><strong>Expected M${req.expectedMastery} · ${esc(req.importance)}</strong><p>${esc(req.outcome)}</p><small>${gap < 0 ? `Gap ${Math.abs(gap)} level` : 'Meets or exceeds expectation'}</small></div></section>` : ''}<section><h2>Career progression</h2><div class="career-matrix">${careerMatrix(node.id)}</div></section><section><h2>${node.kind === 'artifact' ? 'Knowledge demonstrated' : 'Project evidence'}</h2><div class="evidence-list">${evidence.map((id) => { const item = byId(id); return `<button data-go="${esc(id)}"><strong>${esc(item?.title || id)}</strong><span>→</span></button>`; }).join('') || '<p class="muted">Chưa nối evidence.</p>'}</div>${node.url ? `<a class="external-link" href="${esc(node.url)}" target="_blank" rel="noreferrer">Open project ↗</a>` : ''}</section><section><h2>Relations</h2><div class="relation-list">${relationRows(node)}</div></section>`;
+  E.inspector.querySelector('.inspector__close').onclick = () => select(null);
+  E.inspector.querySelectorAll('[data-go]').forEach((button) => { button.onclick = () => navigateTo(button.dataset.go); });
+}
+function renderLegend() {
+  if (S.mode === 'career') { E.legend.innerHTML = '<span><i class="legend-chip legend-chip--current"></i>personal mastery</span><span><i class="legend-chip legend-chip--expected"></i>career expectation</span><span><i class="legend-chip legend-chip--gap"></i>gap</span>'; return; }
+  if (S.mode === 'growth') { E.legend.innerHTML = '<span>M1 recognize</span><span>M3 apply</span><span>M4 diagnose</span><span>M5 design</span><span>M6 teach</span>'; return; }
+  E.legend.innerHTML = '<span><i class="legend-line legend-line--contains"></i>contains</span><span><i class="legend-line legend-line--requires"></i>requires</span><span><i class="legend-line legend-line--applied"></i>applied in</span>';
+}
+function renderHeader() {
+  const view = VIEW[S.mode]; E.viewTitle.textContent = view.title;
+  if (S.mode === 'career') { const level = S.profile.levels.find((item) => item.key === S.careerLevel); E.viewDescription.textContent = `${level.title}: ${level.outcome}`; }
+  else E.viewDescription.textContent = view.description;
+}
+function applyView() { E.scene.style.transform = `translate(${S.view.x}px, ${S.view.y}px) scale(${S.view.scale})`; }
+function fit() {
+  const entries = [...S.positions.entries()].filter(([id]) => S.visible.has(id)); if (!entries.length) return;
+  const minX = Math.min(...entries.map(([, position]) => position.x)); const minY = Math.min(...entries.map(([, position]) => position.y));
+  const maxX = Math.max(...entries.map(([id, position]) => position.x + nodeWidth(byId(id)))); const maxY = Math.max(...entries.map(([, position]) => position.y + 118));
+  const bounds = E.canvas.getBoundingClientRect();
+  const scale = Math.max(0.22, Math.min(1.05, (bounds.width - 90) / Math.max(1, maxX - minX), (bounds.height - 90) / Math.max(1, maxY - minY)));
+  S.view = { scale, x: (bounds.width - (maxX - minX) * scale) / 2 - minX * scale, y: (bounds.height - (maxY - minY) * scale) / 2 - minY * scale };
+  applyView();
+}
+function render(shouldFit = false) {
+  S.visible = visibleIds(); S.positions = treeLayout(S.visible); renderSidebar(); renderHeader(); renderNodes(); renderEdges(); renderInspector(); renderLegend();
+  E.visible.textContent = String(S.visible.size); E.total.textContent = String(S.graph.nodes.length); applyView(); if (shouldFit) requestAnimationFrame(fit);
+}
+function select(id) { S.selected = id; history.replaceState(null, '', id ? `#${encodeURIComponent(id)}` : location.pathname + location.search); render(false); }
+function navigateTo(id) {
+  const node = byId(id); if (!node) return; S.query = ''; E.search.value = '';
+  if (node.kind !== 'artifact') { const domain = rootDomain(id); if (domain) S.domain = domain; S.depthLimit = Math.max(S.depthLimit, S.depth.get(id) || 0); }
+  select(id); requestAnimationFrame(fit);
+}
+function startNodeDrag(event, id) {
+  if (event.button !== 0) return; event.stopPropagation(); const element = event.currentTarget; const position = S.positions.get(id);
+  S.drag = { id, element, startX: event.clientX, startY: event.clientY, x: position.x, y: position.y }; element.setPointerCapture(event.pointerId);
+}
+function move(event) {
+  if (S.drag) { const dx = (event.clientX - S.drag.startX) / S.view.scale; const dy = (event.clientY - S.drag.startY) / S.view.scale; const position = { x: S.drag.x + dx, y: S.drag.y + dy }; S.manual.set(S.drag.id, position); S.positions.set(S.drag.id, position); S.drag.element.style.transform = `translate(${position.x}px, ${position.y}px)`; renderEdges(); return; }
+  if (S.panning) { S.view.x += event.movementX; S.view.y += event.movementY; applyView(); }
+}
+function stop(event) { if (S.drag) { try { S.drag.element.releasePointerCapture(event.pointerId); } catch {} S.drag = null; } S.panning = false; E.canvas.classList.remove('is-panning'); }
+function reset() { S.mode = 'library'; S.domain = null; S.depthLimit = 3; S.careerLevel = 'senior'; S.gapOnly = false; S.minMastery = 0; S.query = ''; S.selected = null; S.collapsed.clear(); S.manual.clear(); E.search.value = ''; render(true); }
+function bind() {
+  E.search.oninput = (event) => { S.query = event.target.value; render(true); };
+  E.depthInput.oninput = (event) => { S.depthLimit = Number(event.target.value); E.depthValue.value = String(S.depthLimit); render(true); };
+  E.careerLevel.onchange = (event) => { S.careerLevel = event.target.value; render(true); };
+  E.careerGapOnly.onchange = (event) => { S.gapOnly = event.target.checked; render(true); };
+  E.masteryFilter.onchange = (event) => { S.minMastery = Number(event.target.value); render(true); };
+  document.addEventListener('keydown', (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); E.search.focus(); } if (event.key === 'Escape') { S.query = ''; S.selected = null; E.search.value = ''; render(true); } });
+  E.canvas.onpointerdown = (event) => { if (event.target.closest('.knowledge-node,.canvas-controls')) return; S.panning = true; E.canvas.classList.add('is-panning'); };
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', stop);
+  E.canvas.onwheel = (event) => { event.preventDefault(); const bounds = E.canvas.getBoundingClientRect(); const mouseX = event.clientX - bounds.left; const mouseY = event.clientY - bounds.top; const oldScale = S.view.scale; const nextScale = Math.max(0.2, Math.min(1.8, oldScale * (event.deltaY < 0 ? 1.1 : 0.9))); S.view.x = mouseX - (mouseX - S.view.x) * (nextScale / oldScale); S.view.y = mouseY - (mouseY - S.view.y) * (nextScale / oldScale); S.view.scale = nextScale; applyView(); };
+  $('#zoom-in').onclick = () => { S.view.scale = Math.min(1.8, S.view.scale * 1.15); applyView(); };
+  $('#zoom-out').onclick = () => { S.view.scale = Math.max(0.2, S.view.scale / 1.15); applyView(); };
+  $('#fit-view').onclick = fit; $('#reset-view').onclick = reset;
+}
+async function loadJson(path) { const response = await fetch(path); if (!response.ok) throw new Error(`Không tải được ${path} (${response.status}).`); return response.json(); }
+async function init() {
+  try {
+    [S.graph, S.overlay, S.profile] = await Promise.all([loadJson('./data/graph.json'), loadJson('./data/overlays/huy.public.json'), loadJson('./data/profiles/backend-engineer.json')]);
+    validate(S.graph, S.overlay, S.profile); buildIndexes(); bind();
+    const hash = decodeURIComponent(location.hash.slice(1)); if (hash && byId(hash)) { S.selected = hash; S.depthLimit = Math.max(S.depthLimit, S.depth.get(hash) || 0); }
+    render(true);
+  } catch (error) { document.body.innerHTML = `<main class="fatal-error"><h1>Không thể mở Knowledge Graph</h1><p>${esc(error.message)}</p><p>Hãy chạy qua HTTP server và kiểm tra data validation.</p></main>`; console.error(error); }
+}
+init();
