@@ -1,5 +1,7 @@
 # Knowledge Canvas
 
+[Open the live Knowledge Canvas](https://huygdv.github.io/knowledge-graph/)
+
 A lean personal knowledge graph for organizing engineering topics, learning status, prerequisites, relationships, and project evidence.
 
 ## Implemented in v0.1
