@@ -1,0 +1,106 @@
+:root {
+  --canvas-background-color: #f8fafc;
+  --canvas-background-image: none;
+  --canvas-background-size: auto;
+}
+
+.canvas {
+  background-color: var(--canvas-background-color) !important;
+  background-image: var(--canvas-background-image) !important;
+  background-size: var(--canvas-background-size) !important;
+  transition: background-color 160ms ease, background-image 160ms ease;
+}
+
+body[data-canvas-background="plain"] {
+  --canvas-background-color: #f8fafc;
+  --canvas-background-image: none;
+  --canvas-background-size: auto;
+}
+
+body[data-canvas-background="grid"] {
+  --canvas-background-color: #f8fafc;
+  --canvas-background-image:
+    linear-gradient(rgba(100, 116, 139, 0.085) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 116, 139, 0.085) 1px, transparent 1px);
+  --canvas-background-size: 32px 32px;
+}
+
+body[data-canvas-background="dots"] {
+  --canvas-background-color: #f8fafc;
+  --canvas-background-image: radial-gradient(rgba(100, 116, 139, 0.32) 0.75px, transparent 0.75px);
+  --canvas-background-size: 26px 26px;
+}
+
+body[data-canvas-background="slate"] {
+  --canvas-background-color: #172033;
+  --canvas-background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  --canvas-background-size: 36px 36px;
+}
+
+body[data-canvas-background="slate"] .canvas-hint,
+body[data-canvas-background="slate"] .canvas-legend {
+  background: rgba(15, 23, 42, 0.82);
+  border-color: rgba(148, 163, 184, 0.24);
+  color: #cbd5e1;
+}
+
+body[data-canvas-background="slate"] .edge--contains {
+  stroke: #94a3b8;
+}
+
+.scene {
+  will-change: auto !important;
+  transform-style: flat;
+}
+
+.knowledge-node,
+.knowledge-node * {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+.canvas-style-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #64748b;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.canvas-style-control > span {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.canvas-style-select {
+  height: 32px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  padding: 0 28px 0 9px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.canvas-style-select:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.12);
+  border-color: #93b4f7;
+}
+
+@media (max-width: 1050px) {
+  .canvas-style-control > span {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .canvas-style-control {
+    display: none;
+  }
+}
