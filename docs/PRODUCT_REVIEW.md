@@ -1,60 +1,60 @@
-# Product review v0.1 — Tech Lead × Solution Architect × Product Owner
+# Product review v0.2 — Personal knowledge infrastructure
 
 ## Product thesis
 
-Knowledge Canvas is not a generic whiteboard. It is a personal knowledge graph with multiple projections: roadmap, library, skill map, and project evidence.
+The product is a personal engineering knowledge graph, not a checklist of topics to learn.
 
-## Tech Lead review
+Its core loop is:
 
-- Keep the first release read-only. Building an editor before the information model is proven creates a large testing and interaction burden.
-- Treat content as code. Pull requests become the initial authoring, review, versioning, and rollback workflow.
-- Validate node IDs, edge references, and schema before every deployment.
-- Use a zero-build static implementation for the first product experiment. It removes package and build-chain risk while preserving the graph domain model.
-- Seed the app with real data. Mock content hides information-architecture problems.
+```text
+Learn → Apply → Capture → Connect → Explain → Teach → Refine
+```
 
-## Solution Architect review
+## Primary jobs
 
-- The canonical model is a graph; the canvas is only one projection.
-- Keep stable global IDs (`area.backend`, `topic.postgresql`, `artifact.dw-kit`) so data can later be reused by Causari, BigTimeline, or agent tooling.
-- Static architecture for v0.1: JSON → validation → browser modules → GitHub Pages.
-- Do not introduce React, a graph database, or a backend until a concrete use case requires them.
-- Relation semantics remain explicit: `contains`, `requires`, `relates_to`, `applied_in`.
-- Migration trigger to React Flow: more than ~150 visible nodes, custom node plugins, rich editing, or multiple projections sharing complex interaction state.
+1. Locate a concept quickly and understand where it sits.
+2. Navigate from broad domain to deep implementation detail.
+3. Compare current mastery with a career expectation.
+4. Show which projects demonstrate a capability.
+5. Reuse the same knowledge structure to teach another person later.
 
-## Product Owner review
+## Projection strategy
 
-Primary job-to-be-done:
+- **Library** answers “What knowledge exists and how is it connected?”
+- **Career Lens** answers “What does this role and level expect?”
+- **Growth** answers “What is my current relationship with the knowledge?”
+- **Evidence** answers “Where have I applied it?”
+- **Mentor** is deferred until real coaching sessions provide curriculum evidence.
 
-> Help me locate a concept quickly, understand where it sits, see what it depends on, and connect it to evidence from my actual projects.
+## Scope decisions
 
-The MVP succeeds when the owner can:
+### Included in v0.2
 
-1. Scan the top-level knowledge areas.
-2. Drill into a field without seeing the entire graph.
-3. Search a topic or tag in seconds.
-4. Understand direct relationships in one inspector.
-5. Add knowledge through a reviewed data change and redeploy automatically.
+- canonical graph and separate overlay/profile files
+- meaningful depth up to six levels
+- Backend Engineer profile from Fresher to Lead
+- public seed mastery overlay
+- four working projections
+- project evidence links
 
-## Explicitly deferred
+### Deferred
 
-- In-browser editing
-- Authentication and cloud database
-- Collaboration
-- AI-generated roadmaps
-- Freehand drawing
-- Realtime sync
-- Public marketplace/community roadmaps
+- in-browser editing
+- private overlay synchronization
+- multiple people or students
+- lesson plans, exercises, and rubrics as first-class data
+- AI-generated learning paths
+- graph database/backend
 
-## Risks and mitigations
+## Next experiment
 
-| Risk | Mitigation |
-|---|---|
-| Canvas becomes unreadable | Progressive expansion, filters, contextual dimming |
-| Taxonomy becomes inconsistent | Small schema, stable IDs, validation and PR review |
-| Product becomes a bookmark store | Require summaries, relations, status, and project evidence |
-| Overengineering for future integrations | Stable IDs and adapters later; no shared runtime now |
-| Static prototype becomes permanent debt | Explicit migration triggers and isolated domain data |
+Use the graph daily for two weeks. Record:
 
-## Next product experiment
+- concepts that are difficult to find
+- nodes whose parent feels wrong
+- mastery values that are too vague
+- career expectations that lack observable outcomes
+- project evidence that is missing or misleading
+- repeated mentoring sequences that deserve a curriculum file
 
-Use the MVP for two weeks and log the questions it fails to answer. The next projection or schema field should be justified by repeated real questions, not imagined completeness.
+The next schema extension must answer repeated real questions rather than increase abstract completeness.
