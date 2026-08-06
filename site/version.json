@@ -1,0 +1,6 @@
+{
+  "version": "0.2.0",
+  "schemaVersion": 2,
+  "releasedAt": "2026-08-06",
+  "features": ["library", "career-lens", "growth", "evidence"]
+}
