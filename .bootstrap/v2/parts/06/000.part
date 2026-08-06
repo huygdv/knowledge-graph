@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Personal Engineering Knowledge Graph — library, career lens, growth and evidence." />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Personal Engineering Knowledge Graph</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <aside class="sidebar" aria-label="Knowledge graph controls">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">K</span>
+        <div>
+          <strong>Knowledge Graph</strong>
+          <small>Engineering growth & mentorship</small>
+        </div>
+      </div>
+
+      <section class="sidebar-section">
+        <h2>View mode</h2>
+        <div id="view-modes" class="segmented-list"></div>
+      </section>
+
+      <section class="sidebar-section">
+        <h2>Domains</h2>
+        <div id="domain-filters"></div>
+      </section>
+
+      <section class="sidebar-section" id="library-controls">
+        <div class="section-heading">
+          <h2>Library depth</h2>
+          <output id="depth-value">3</output>
+        </div>
+        <input id="depth-input" class="range" type="range" min="1" max="6" value="3" step="1" />
+        <p class="section-help">Depth được tính từ quan hệ <code>contains</code>, không lưu cứng trên node.</p>
+      </section>
+
+      <section class="sidebar-section is-hidden" id="career-controls">
+        <h2>Career lens</h2>
+        <label class="field-label" for="career-level">Backend Engineer level</label>
+        <select id="career-level" class="select"></select>
+        <label class="toggle-row"><input id="career-gap-only" type="checkbox" /> Chỉ hiện capability gap</label>
+      </section>
+
+      <section class="sidebar-section is-hidden" id="growth-controls">
+        <h2>Growth</h2>
+        <label class="field-label" for="mastery-filter">Minimum mastery</label>
+        <select id="mastery-filter" class="select"></select>
+      </section>
+
+      <button id="reset-view" class="reset-button" type="button">↺ Đặt lại view</button>
+    </aside>
+
+    <main class="workspace">
+      <header class="toolbar">
+        <div class="toolbar__left">
+          <label class="search-box">
+            <span aria-hidden="true">⌕</span>
+            <input id="search-input" type="search" placeholder="Tìm concept, technique, tool hoặc project..." autocomplete="off" />
+            <kbd>⌘K</kbd>
+          </label>
+          <div>
+            <strong id="view-title" class="view-title">Library</strong>
+            <span id="view-description" class="view-description">Canonical knowledge map</span>
+          </div>
+        </div>
+        <div class="toolbar__stats"><strong id="visible-count">0</strong> / <span id="total-count">0</span> nodes</div>
+      </header>
+
+      <section id="canvas" class="canvas" aria-label="Personal engineering knowledge graph">
+        <div id="scene" class="scene">
+          <svg id="edges-layer" class="edges-layer" aria-hidden="true"></svg>
+          <div id="nodes-layer" class="nodes-layer"></div>
+        </div>
+
+        <div class="canvas-controls" aria-label="Canvas controls">
+          <button id="zoom-in" type="button" title="Phóng to">+</button>
+          <button id="zoom-out" type="button" title="Thu nhỏ">−</button>
+          <button id="fit-view" type="button" title="Fit view">⌗</button>
+        </div>
+
+        <div class="canvas-hint">Kéo nền để di chuyển · Lăn chuột để zoom · Kéo node để tinh chỉnh</div>
+        <div id="canvas-legend" class="canvas-legend"></div>
+      </section>
+    </main>
+
+    <aside id="inspector" class="inspector" aria-live="polite"></aside>
+  </div>
+
+  <template id="empty-inspector-template">
+    <div class="inspector-empty">
+      <span class="inspector-empty__icon">◎</span>
+      <strong>Chọn một node</strong>
+      <p>Xem vị trí trong thư viện, mastery cá nhân, career expectation và project evidence.</p>
+    </div>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
