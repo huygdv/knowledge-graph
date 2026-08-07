@@ -4,6 +4,23 @@
   "entries": [
     {
       "date": "2026-08-07",
+      "version": "v0.2.4.1",
+      "title": "Deep Dive freeze hotfix and browser regression gate",
+      "summary": "Fixed an infinite body-class MutationObserver loop that froze the main thread when entering Focus Realm, then added an actual browser interaction smoke test before deployment.",
+      "tags": ["hotfix", "focus-realm", "mutation-observer", "browser-smoke", "qa"],
+      "changes": [
+        "Made Focus Realm body-class synchronization transition-based and idempotent",
+        "Guarded inspector-open removal so the body observer cannot recursively schedule itself",
+        "Added a Chromium smoke flow for single-click selection and double-click Deep Dive",
+        "Smoke flow verifies Focus Realm renders, Capture and Menu header actions work, and Exit returns to the outer canvas",
+        "GitHub Pages deployment is now gated by the browser interaction smoke test",
+        "Pull requests run the same validation path without deploying Pages",
+        "QA pull request #1 / Actions run #72 completed successfully"
+      ],
+      "commit": "bc06d22a9d4c7c91fdc6280a1bec4a7087d813a4"
+    },
+    {
+      "date": "2026-08-07",
       "version": "v0.2.4",
       "title": "Tablet stability and Focus Realm mobile polish",
       "summary": "Stabilized Quick Capture on touch devices, made Deep Dive strictly double-activation for pointer users, and replaced the forced tablet/mobile radial layout with a roomy scrollable constellation.",
