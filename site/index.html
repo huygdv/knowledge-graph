@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="./focus-mode.css" />
   <link rel="stylesheet" href="./responsive-shell.css" />
   <link rel="stylesheet" href="./capture.css" />
+  <link rel="stylesheet" href="./interaction-mode.css" />
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -41,17 +42,19 @@
       <section id="canvas" class="canvas" aria-label="Personal engineering knowledge graph">
         <div id="scene" class="scene"><svg id="edges-layer" class="edges-layer" aria-hidden="true"></svg><div id="nodes-layer" class="nodes-layer"></div></div>
         <div class="canvas-controls" aria-label="Canvas controls"><button id="zoom-in" type="button" title="Phóng to">+</button><button id="zoom-out" type="button" title="Thu nhỏ">−</button><button id="fit-view" type="button" title="Fit view">⌗</button></div>
-        <div class="canvas-hint">Kéo nền để di chuyển · Lăn chuột để zoom · Kéo node để tinh chỉnh · Double-click để Deep Dive</div>
+        <div class="canvas-hint">Navigate mode · Kéo để pan · 2 ngón để zoom · Double-click để Deep Dive</div>
         <div id="canvas-legend" class="canvas-legend"></div>
       </section>
     </main>
     <aside id="inspector" class="inspector" aria-live="polite"></aside>
   </div>
   <template id="empty-inspector-template"><div class="inspector-empty"><span class="inspector-empty__icon">◎</span><strong>Chọn một node</strong><p>Xem vị trí trong thư viện, mastery cá nhân, career expectation và project evidence.</p></div></template>
+  <script src="./interaction-bridge.js"></script>
   <script type="module" src="./app.js"></script>
   <script type="module" src="./polish.js"></script>
   <script type="module" src="./focus-mode.js"></script>
   <script type="module" src="./responsive-shell.js"></script>
   <script type="module" src="./capture.js"></script>
+  <script type="module" src="./interaction-mode.js"></script>
 </body>
 </html>
