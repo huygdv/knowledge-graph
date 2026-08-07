@@ -4,6 +4,25 @@
   "entries": [
     {
       "date": "2026-08-07",
+      "version": "v0.2.4",
+      "title": "Tablet stability and Focus Realm mobile polish",
+      "summary": "Stabilized Quick Capture on touch devices, made Deep Dive strictly double-activation for pointer users, and replaced the forced tablet/mobile radial layout with a roomy scrollable constellation.",
+      "tags": ["tablet", "mobile", "focus-realm", "capture", "hotfix"],
+      "changes": [
+        "Quick Capture opens immediately without waiting for graph data",
+        "Touch devices no longer autofocus the title field and trigger viewport/keyboard flicker",
+        "Heavy dialog backdrop blur is disabled on coarse-pointer devices",
+        "Single click only selects; double-click or double-tap enters Deep Dive",
+        "Nested Focus Realm navigation also uses double activation",
+        "Tablet/mobile Focus Realm uses a spacious scrollable grid and keeps all cards inside the viewport",
+        "Focus Realm detail panel is restored and spaced for small screens",
+        "Focus Realm header now exposes menu, Quick Capture and fullscreen actions",
+        "Regular inspector auto-closes when entering Focus Realm"
+      ],
+      "commit": "5de58b76a66d70dbc7893d5b40702d9a62889860"
+    },
+    {
+      "date": "2026-08-07",
       "version": "v0.2.3",
       "title": "Interaction hotfix and gesture model",
       "summary": "Reworked canvas input around explicit Navigate and Edit modes, fixed Deep Dive double activation, desktop sidebar collapse, and touch pinch zoom.",
