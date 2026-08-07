@@ -8,6 +8,7 @@
   <title>Personal Engineering Knowledge Graph</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./polish.css" />
+  <link rel="stylesheet" href="./focus-mode.css" />
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -83,7 +84,7 @@
           <button id="fit-view" type="button" title="Fit view">⌗</button>
         </div>
 
-        <div class="canvas-hint">Kéo nền để di chuyển · Lăn chuột để zoom · Kéo node để tinh chỉnh</div>
+        <div class="canvas-hint">Kéo nền để di chuyển · Lăn chuột để zoom · Kéo node để tinh chỉnh · Double-click để Deep Dive</div>
         <div id="canvas-legend" class="canvas-legend"></div>
       </section>
     </main>
@@ -101,5 +102,6 @@
 
   <script type="module" src="./app.js"></script>
   <script type="module" src="./polish.js"></script>
+  <script type="module" src="./focus-mode.js"></script>
 </body>
 </html>
