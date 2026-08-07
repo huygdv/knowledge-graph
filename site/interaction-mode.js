@@ -180,13 +180,13 @@ function handlePointerDown(event) {
   const navigateMouseOnNode = event.pointerType === 'mouse' && interaction.mode === 'navigate' && card;
   if (!touchLike && !navigateMouseOnNode) return;
 
-  if (touchLike) {
+  if (touchLike || navigateMouseOnNode) {
     interaction.pointers.set(event.pointerId, {
       id: event.pointerId, x: event.clientX, y: event.clientY,
       startX: event.clientX, startY: event.clientY, moved: false,
       card, target: event.target
     });
-    if (interaction.pointers.size >= 2) {
+    if (touchLike && interaction.pointers.size >= 2) {
       event.preventDefault(); event.stopImmediatePropagation();
       beginPinch();
       return;
