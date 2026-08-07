@@ -33,6 +33,7 @@ jobs:
         run: |
           node --check site/app.js
           node --check site/polish.js
+          node --check site/focus-mode.js
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
