@@ -135,8 +135,8 @@ function pointerMidpoint(a, b) { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2
 function invokeZoom(direction, midpoint) {
   if (!interaction.canvasWheel) return;
   const scale = currentScale();
-  if (direction > 0 && scale >= MAX_TOUCH_ZOOM) return;
-  if (direction < 0 && scale <= MIN_TOUCH_ZOOM) return;
+  if (direction > 0 && scale * 1.1 > MAX_TOUCH_ZOOM) return;
+  if (direction < 0 && scale * 0.9 < MIN_TOUCH_ZOOM) return;
   interaction.canvasWheel({
     preventDefault() {},
     deltaY: direction > 0 ? -1 : 1,
