@@ -4,6 +4,25 @@ The public, data-driven timeline is available at:
 
 - https://huygdv.github.io/knowledge-graph/changelog/
 
+## v0.2.4 — 2026-08-07
+
+### Fixed
+
+- Quick Capture on tablet/touch devices now opens immediately instead of waiting for graph data before showing the dialog.
+- Touch devices no longer autofocus the capture title field, avoiding keyboard/viewport jump and popup flicker.
+- Heavy dialog backdrop blur is disabled on coarse-pointer devices.
+- Single click now only selects a node; pointer users enter Deep Dive only through double-click/double-tap.
+- Nested Focus Realm navigation follows the same double-activation rule.
+- Tablet/mobile Focus Realm no longer lays itself out as an artificial 720px radial canvas.
+- Focus Realm detail content is visible again on mobile and given more vertical spacing.
+- Regular inspector is closed automatically when entering Focus Realm so it cannot cover the immersive view.
+
+### Added
+
+- Responsive Focus Realm “scrollable constellation” layout for tablet/mobile.
+- Focus Realm header actions for menu, Quick Capture and fullscreen.
+- Stable graph prefetching for the local-first capture workflow.
+
 ## v0.2.3 — 2026-08-07
 
 ### Fixed
