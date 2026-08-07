@@ -1,0 +1,1 @@
+Temporary QA trigger for v0.2.4.1 browser interaction verification.
