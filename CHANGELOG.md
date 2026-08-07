@@ -4,6 +4,22 @@ The public, data-driven timeline is available at:
 
 - https://huygdv.github.io/knowledge-graph/changelog/
 
+## v0.2.4.1 — 2026-08-07
+
+### Fixed
+
+- Fixed a Focus Realm main-thread freeze caused by a `MutationObserver` watching `body.class` and mutating the same class attribute on every callback.
+- Focus Realm state synchronization is now transition-based and idempotent.
+- `inspector-open` is removed only when it is actually present, preventing recursive observer scheduling.
+
+### Verification
+
+- Added an actual Chromium browser smoke test instead of relying on syntax checks alone.
+- The smoke flow verifies: single click selects only → double click enters Focus Realm → Focus Realm renders nodes → header Capture/Menu actions respond → Exit returns to the outer canvas.
+- GitHub Pages deployment is gated by this browser interaction smoke test.
+- Pull requests execute the same validation path without deploying Pages.
+- QA PR #1 / GitHub Actions run #72 completed successfully before the QA PR was closed without merge.
+
 ## v0.2.4 — 2026-08-07
 
 ### Fixed
