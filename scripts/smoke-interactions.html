@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Knowledge Graph interaction smoke test</title>
+  <style>
+    html,body{margin:0;height:100%;font:14px system-ui,sans-serif}iframe{width:100%;height:100%;border:0}#status{position:fixed;z-index:9999;left:8px;top:8px;padding:6px 9px;background:#fff;border:1px solid #ccc}
+  </style>
+</head>
+<body data-smoke-status="running">
+  <div id="status">running</div>
+  <iframe id="app" src="../site/index.html?interaction-smoke=1"></iframe>
+  <script>
+    const status = document.querySelector('#status');
+    const frame = document.querySelector('#app');
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    function fail(message) {
+      document.body.dataset.smokeStatus = 'fail';
+      document.body.dataset.smokeError = message;
+      status.textContent = `FAIL: ${message}`;
+      throw new Error(message);
+    }
+
+    async function waitFor(check, label, timeout = 5000) {
+      const started = performance.now();
+      while (performance.now() - started < timeout) {
+        const value = check();
+        if (value) return value;
+        await sleep(25);
+      }
+      fail(`timeout waiting for ${label}`);
+    }
+
+    function appClick(win, element) {
+      element.dispatchEvent(new win.MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: win,
+        detail: 1
+      }));
+    }
+
+    async function run() {
+      await new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
+      const win = frame.contentWindow;
+      const doc = frame.contentDocument;
+
+      const firstNode = await waitFor(() => doc.querySelector('#nodes-layer .knowledge-node'), 'first knowledge node');
+      const id = firstNode.dataset.id;
+      if (!id) fail('first knowledge node has no stable id');
+
+      // A single click must select only, never enter Focus Realm.
+      appClick(win, firstNode);
+      await sleep(460);
+      if (doc.body.classList.contains('is-focus-realm')) fail('single click entered Focus Realm');
+
+      // Double activation must survive the app re-render between clicks.
+      let node = doc.querySelector(`#nodes-layer .knowledge-node[data-id="${CSS.escape(id)}"]`);
+      if (!node) fail('selected node disappeared before double activation');
+      appClick(win, node);
+      await sleep(70);
+      node = doc.querySelector(`#nodes-layer .knowledge-node[data-id="${CSS.escape(id)}"]`);
+      if (!node) fail('node disappeared after first double-click activation');
+      appClick(win, node);
+
+      await waitFor(() => doc.body.classList.contains('is-focus-realm'), 'Focus Realm activation', 2500);
+      const realm = await waitFor(() => {
+        const element = doc.querySelector('#focus-realm');
+        return element && !element.hidden ? element : null;
+      }, 'visible Focus Realm');
+
+      const focusNodes = realm.querySelectorAll('.focus-node');
+      if (!focusNodes.length) fail('Focus Realm rendered no nodes');
+
+      const actions = realm.querySelectorAll('.focus-nav-actions [data-focus-action]');
+      if (actions.length !== 3) fail(`expected 3 Focus Realm header actions, got ${actions.length}`);
+
+      const captureButton = realm.querySelector('[data-focus-action="capture"]');
+      captureButton.click();
+      await waitFor(() => doc.querySelector('#capture-dialog')?.open, 'Quick Capture dialog');
+      doc.querySelector('#capture-dialog').close();
+
+      const menuButton = realm.querySelector('[data-focus-action="menu"]');
+      const sidebarBefore = doc.body.classList.contains('sidebar-collapsed');
+      menuButton.click();
+      await sleep(60);
+      const sidebarAfter = doc.body.classList.contains('sidebar-collapsed');
+      if (sidebarBefore === sidebarAfter && win.innerWidth > 840) fail('desktop sidebar menu did not toggle');
+
+      realm.querySelector('.focus-exit').click();
+      await waitFor(() => !doc.body.classList.contains('is-focus-realm'), 'Focus Realm exit', 1500);
+
+      document.body.dataset.smokeStatus = 'pass';
+      status.textContent = 'PASS';
+    }
+
+    run().catch((error) => {
+      if (document.body.dataset.smokeStatus !== 'fail') {
+        document.body.dataset.smokeStatus = 'fail';
+        document.body.dataset.smokeError = error.message || String(error);
+        status.textContent = `FAIL: ${error.message || error}`;
+      }
+      console.error(error);
+    });
+  </script>
+</body>
+</html>
