@@ -1,3 +1,4 @@
+.capture-launch-button { display: inline-flex; }
 .capture-dialog {
   width: min(860px, calc(100vw - 32px));
   max-height: min(780px, calc(100dvh - 32px));
