@@ -34,12 +34,25 @@ jobs:
 
       - name: Validate JavaScript syntax
         run: |
+          node --check site/interaction-bridge.js
           node --check site/app.js
           node --check site/polish.js
           node --check site/focus-mode.js
           node --check site/responsive-shell.js
           node --check site/capture.js
+          node --check site/interaction-mode.js
           node --check site/changelog/app.js
+
+      - name: Verify interaction layer order
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          html = Path('site/index.html').read_text()
+          required = ['interaction-bridge.js', 'app.js', 'focus-mode.js', 'responsive-shell.js', 'interaction-mode.js']
+          positions = [html.index(name) for name in required]
+          assert positions == sorted(positions), 'interaction scripts are not loaded in the required order'
+          assert 'interaction-mode.css' in html
+          PY
 
       - name: Verify public documentation pages
         run: |
