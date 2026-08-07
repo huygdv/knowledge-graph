@@ -1,6 +1,7 @@
 const UX24 = {
   graphPromise: null,
   focusTap: { id: null, at: 0 },
+  focusRealmActive: null,
   DOUBLE_TAP_MS: 380
 };
 
@@ -106,7 +107,7 @@ function decorateDeepDiveHint() {
 
   const diveButton = document.querySelector('.focus-realm__detail [data-dive]');
   if (diveButton) {
-    diveButton.hidden = true;
+    if (!diveButton.hidden) diveButton.hidden = true;
     let hint = document.querySelector('.focus-realm__detail .focus-double-hint');
     if (!hint) {
       hint = document.createElement('small');
@@ -193,11 +194,18 @@ function installFocusHeaderActions() {
 
 function syncFocusRealmState() {
   const active = document.body.classList.contains('is-focus-realm');
-  if (active) {
+
+  // MutationObserver callbacks must be idempotent. Without this transition guard,
+  // mutating body.class from inside the body.class observer can schedule itself forever.
+  if (active === UX24.focusRealmActive) return;
+  UX24.focusRealmActive = active;
+  if (!active) return;
+
+  if (document.body.classList.contains('inspector-open')) {
     document.body.classList.remove('inspector-open');
-    installFocusHeaderActions();
-    decorateDeepDiveHint();
   }
+  installFocusHeaderActions();
+  decorateDeepDiveHint();
 }
 
 function installFocusRealmPolish() {
