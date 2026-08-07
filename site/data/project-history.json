@@ -4,6 +4,23 @@
   "entries": [
     {
       "date": "2026-08-07",
+      "version": "v0.2.3",
+      "title": "Interaction hotfix and gesture model",
+      "summary": "Reworked canvas input around explicit Navigate and Edit modes, fixed Deep Dive double activation, desktop sidebar collapse, and touch pinch zoom.",
+      "tags": ["interaction", "touch", "pinch-zoom", "deep-dive", "hotfix"],
+      "changes": [
+        "Navigate mode is the safe default and prevents accidental node dragging",
+        "Edit mode explicitly enables node layout dragging",
+        "Two-finger pinch zoom on tablet and mobile",
+        "Double-click and double-tap detection by stable node ID",
+        "Desktop menu now collapses and restores the sidebar",
+        "Pan starting on a node no longer causes false node activation",
+        "H and V keyboard shortcuts switch interaction modes"
+      ],
+      "commit": "3c738d2144fa7eec29384a0ffb272f6bb92a841c"
+    },
+    {
+      "date": "2026-08-07",
       "version": "v0.2.2",
       "title": "Responsive workspace, local authoring and public technical communication",
       "summary": "Made the knowledge system practical across desktop, tablet and mobile while adding a safe daily capture workflow and durable architecture/history pages.",
