@@ -4,6 +4,23 @@ The public, data-driven timeline is available at:
 
 - https://huygdv.github.io/knowledge-graph/changelog/
 
+## v0.2.3 — 2026-08-07
+
+### Fixed
+
+- Deep Dive now recognizes double-click/double-tap by stable node ID instead of relying on native `dblclick` across re-rendered DOM nodes.
+- Desktop menu now collapses/restores the sidebar and persists the preference.
+- Tablet/mobile canvas supports two-finger pinch zoom.
+- Navigate mode prevents accidental node dragging while panning, including when the gesture starts directly on a node.
+- Panning a node in Navigate mode no longer causes a false selection after release.
+
+### Added
+
+- Explicit canvas interaction modes inspired by design tools:
+  - **Navigate (H)** — safe default for pan, inspect and deep dive.
+  - **Edit (V)** — enables node layout dragging.
+- Touch/pen gesture bridge that reuses the core canvas state instead of maintaining a competing transform model.
+
 ## v0.2.2 — 2026-08-07
 
 ### Added
