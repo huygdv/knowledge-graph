@@ -1,0 +1,63 @@
+.mobile-menu-button { display: inline-flex !important; }
+
+.interaction-mode-control {
+  position: absolute;
+  top: 12px;
+  right: 58px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid #dbe3ee;
+  border-radius: 11px;
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 5px 18px rgba(15,23,42,.08);
+  backdrop-filter: blur(12px);
+}
+.interaction-mode-control button {
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 9px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 750;
+}
+.interaction-mode-control button:hover { background: #f1f5f9; color: #0f172a; }
+.interaction-mode-control button.is-active { background: #e8efff; color: #1d4ed8; }
+.interaction-mode-control small { font: inherit; }
+.interaction-mode-status { display: none; }
+body[data-interaction-mode="navigate"] .knowledge-node { cursor: pointer !important; }
+body[data-interaction-mode="edit"] .knowledge-node { cursor: move !important; }
+body[data-interaction-mode="edit"] .interaction-mode-control { border-color: #f1c36d; }
+body[data-interaction-mode="edit"] .interaction-mode-status { color: #92400e; }
+body.is-pinching .knowledge-node { pointer-events: none; }
+
+body.sidebar-collapsed .sidebar { display: none !important; }
+body.sidebar-collapsed .app-shell { grid-template-columns: minmax(0, 1fr) 318px; }
+
+@media (max-width: 1180px) and (min-width: 841px) {
+  body.sidebar-collapsed .app-shell { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 840px) {
+  body.sidebar-collapsed .sidebar { display: flex !important; }
+  .interaction-mode-control { top: 8px; right: 50px; }
+  .interaction-mode-control button { width: 32px; padding: 0; justify-content: center; }
+  .interaction-mode-control button small { display: none; }
+  .capture-launch-button { display: inline-flex !important; }
+}
+
+@media (max-width: 520px) {
+  .interaction-mode-control { right: 48px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interaction-mode-control { backdrop-filter: none; }
+}
