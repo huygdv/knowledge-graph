@@ -1,0 +1,240 @@
+.deep-dive-action {
+  width: 100%;
+  margin: -4px 0 20px;
+  border: 1px solid rgba(99, 102, 241, .2);
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(238, 242, 255, .94), rgba(245, 243, 255, .94));
+  color: #312e81;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: center;
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(79, 70, 229, .08);
+}
+.deep-dive-action:hover { border-color: rgba(79, 70, 229, .42); transform: translateY(-1px); }
+.deep-dive-action__icon { width: 32px; height: 32px; border-radius: 999px; display: grid; place-items: center; color: white; background: radial-gradient(circle at 35% 30%, #a5b4fc, #4f46e5 58%, #312e81); box-shadow: 0 0 0 5px rgba(99,102,241,.08), 0 0 18px rgba(79,70,229,.26); }
+.deep-dive-action strong, .deep-dive-action small { display: block; }
+.deep-dive-action strong { font-size: 11px; }
+.deep-dive-action small { margin-top: 2px; color: #6366a7; font-size: 8px; }
+
+.focus-realm {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  overflow: hidden;
+  isolation: isolate;
+  color: #e2e8f0;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(76, 29, 149, .24), transparent 28%),
+    radial-gradient(circle at 50% 45%, rgba(15, 23, 42, .42), rgba(2, 6, 23, .94) 73%),
+    linear-gradient(150deg, #10172e, #080d1c 55%, #11152c);
+  opacity: 1;
+  transition: opacity .4s ease, filter .4s ease;
+}
+.focus-realm[hidden] { display: none; }
+.focus-realm::before,
+.focus-realm::after {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  pointer-events: none;
+}
+.focus-realm::before {
+  background-image:
+    radial-gradient(circle, rgba(196, 181, 253, .48) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(125, 211, 252, .24) 0 1px, transparent 1.5px);
+  background-position: 0 0, 27px 39px;
+  background-size: 74px 74px, 103px 103px;
+  opacity: .38;
+  animation: realm-stars 40s linear infinite;
+}
+.focus-realm::after {
+  background: conic-gradient(from 30deg at 50% 48%, transparent, rgba(129, 140, 248, .06), transparent 23%, rgba(56, 189, 248, .05), transparent 48%);
+  animation: realm-rotate 50s linear infinite;
+}
+.focus-realm.is-entering { opacity: 0; filter: blur(13px) brightness(1.6); }
+.focus-realm.is-leaving { opacity: 0; filter: blur(10px) brightness(.72); }
+
+.focus-realm__mist {
+  position: absolute;
+  inset: 12% 8%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(129, 140, 248, .11), transparent 66%);
+  filter: blur(30px);
+  animation: realm-breathe 6s ease-in-out infinite;
+}
+.focus-realm__portal {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: min(46vw, 580px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: .62;
+}
+.focus-realm__portal::before,
+.focus-realm__portal::after,
+.focus-realm__portal i {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(129, 140, 248, .19);
+  border-radius: 50%;
+  box-shadow: inset 0 0 46px rgba(99, 102, 241, .05), 0 0 42px rgba(56, 189, 248, .05);
+}
+.focus-realm__portal::after { inset: 14%; border-style: dashed; animation: realm-rotate 28s linear infinite reverse; }
+.focus-realm__portal i:nth-child(1) { inset: 29%; border-color: rgba(167, 139, 250, .25); }
+.focus-realm__portal i:nth-child(2) { inset: 42%; border-style: dotted; animation: realm-rotate 18s linear infinite; }
+.focus-realm__portal i:nth-child(3) { inset: 48%; background: radial-gradient(circle, rgba(129,140,248,.18), transparent 72%); border: 0; filter: blur(12px); }
+
+.focus-nav {
+  position: absolute;
+  z-index: 12;
+  left: 16px;
+  right: 16px;
+  top: 14px;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(148, 163, 184, .15);
+  border-radius: 13px;
+  padding: 6px 8px;
+  background: rgba(9, 15, 31, .72);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 14px 44px rgba(2, 6, 23, .24);
+}
+.focus-back, .focus-exit, .focus-breadcrumb button {
+  border: 0;
+  color: #cbd5e1;
+  background: transparent;
+  cursor: pointer;
+}
+.focus-back { border: 1px solid rgba(148,163,184,.15); border-radius: 9px; padding: 7px 10px; font-size: 10px; }
+.focus-back:hover, .focus-breadcrumb button:hover { background: rgba(129, 140, 248, .12); color: white; }
+.focus-exit { width: 32px; height: 32px; border-radius: 9px; font-size: 20px; }
+.focus-exit:hover { background: rgba(244, 63, 94, .12); color: #fda4af; }
+.focus-breadcrumb { display: flex; align-items: center; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.focus-breadcrumb::-webkit-scrollbar { display: none; }
+.focus-breadcrumb button { flex: 0 0 auto; border-radius: 7px; padding: 5px 6px; font-size: 10px; white-space: nowrap; }
+.focus-breadcrumb button span { color: #64748b; margin-right: 7px; }
+.focus-breadcrumb button[aria-current="page"] { color: #c4b5fd; font-weight: 700; }
+.focus-count { color: #64748b; font-size: 9px; white-space: nowrap; }
+
+.focus-realm__nodes,
+.focus-realm__edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.focus-realm__edges { z-index: 2; overflow: visible; pointer-events: none; }
+.focus-realm__nodes { z-index: 4; }
+.focus-edge { fill: none; stroke-width: 1.4; vector-effect: non-scaling-stroke; opacity: .58; stroke-dasharray: 8 7; animation: realm-flow 1.8s linear infinite; }
+.focus-edge--contains { stroke: rgba(165, 180, 252, .72); stroke-dasharray: none; }
+.focus-edge--requires { stroke: rgba(251, 191, 36, .74); }
+.focus-edge--applied_in { stroke: rgba(52, 211, 153, .76); }
+.focus-edge--relates_to { stroke: rgba(192, 132, 252, .68); }
+.focus-edge--supports { stroke: rgba(56, 189, 248, .7); }
+.focus-edge--implemented_by { stroke: rgba(244, 114, 182, .66); }
+
+.focus-node {
+  --card-width: 218px;
+  position: absolute;
+  z-index: 4;
+  left: var(--focus-x);
+  top: var(--focus-y);
+  width: var(--card-width);
+  min-height: 116px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(148, 163, 184, .18);
+  border-radius: 15px;
+  padding: 11px 12px 9px;
+  color: #e2e8f0;
+  background: linear-gradient(145deg, rgba(24, 34, 61, .92), rgba(10, 17, 34, .9));
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 54px rgba(2, 6, 23, .34), inset 0 1px rgba(255,255,255,.035);
+  cursor: pointer;
+  user-select: none;
+  opacity: 1;
+  animation: realm-node-arrive .62s cubic-bezier(.2,.8,.2,1) both;
+  animation-delay: var(--focus-delay);
+  transition: border-color .18s ease, box-shadow .18s ease, filter .18s ease, transform .18s ease;
+}
+.focus-node:hover { border-color: rgba(165, 180, 252, .55); transform: translate(-50%, -50%) translateY(-3px); box-shadow: 0 20px 62px rgba(2, 6, 23, .46), 0 0 30px rgba(99, 102, 241, .12); }
+.focus-node.is-selected { border-color: rgba(196, 181, 253, .9); box-shadow: 0 0 0 3px rgba(139,92,246,.14), 0 22px 66px rgba(2,6,23,.52), 0 0 34px rgba(139,92,246,.18); }
+.focus-node--root { --card-width: 258px; min-height: 132px; background: linear-gradient(145deg, rgba(55, 48, 117, .95), rgba(20, 27, 60, .95)); border-color: rgba(196,181,253,.5); z-index: 6; }
+.focus-node--linked { background: linear-gradient(145deg, rgba(17, 42, 58, .9), rgba(10, 20, 35, .91)); }
+.focus-node__glow { position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; background: radial-gradient(circle at 18% 8%, rgba(165,180,252,.15), transparent 36%); }
+.focus-node header { display: flex; align-items: center; gap: 6px; color: #94a3b8; }
+.focus-node header > span { color: #c4b5fd; }
+.focus-node header small { font-size: 8px; text-transform: uppercase; letter-spacing: .09em; }
+.focus-node header b { margin-left: auto; border-radius: 99px; background: rgba(129,140,248,.12); color: #c7d2fe; padding: 3px 5px; font-size: 8px; }
+.focus-node > strong { display: block; margin-top: 8px; color: #f8fafc; font-size: 13px; letter-spacing: -.012em; }
+.focus-node > p { margin: 5px 0 8px; min-height: 28px; color: #94a3b8; font-size: 9px; line-height: 1.45; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.focus-node footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(148,163,184,.09); padding-top: 7px; color: #64748b; font-size: 8px; text-transform: uppercase; letter-spacing: .07em; }
+.focus-node footer i { color: #a5b4fc; font-style: normal; }
+
+.focus-realm__detail {
+  position: absolute;
+  z-index: 11;
+  right: 16px;
+  bottom: 46px;
+  width: min(310px, calc(100% - 32px));
+  border: 1px solid rgba(148,163,184,.14);
+  border-radius: 14px;
+  padding: 13px;
+  background: rgba(8, 14, 29, .78);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 50px rgba(2,6,23,.3);
+}
+.focus-detail__eyebrow { color: #818cf8; font-size: 8px; text-transform: uppercase; letter-spacing: .1em; }
+.focus-realm__detail > strong { display: block; margin-top: 5px; color: #f8fafc; font-size: 13px; }
+.focus-realm__detail > p { margin: 5px 0 9px; color: #94a3b8; font-size: 9px; line-height: 1.5; }
+.focus-detail__meta { display: flex; flex-wrap: wrap; gap: 5px; }
+.focus-detail__meta span { border-radius: 99px; padding: 4px 6px; background: rgba(148,163,184,.08); color: #94a3b8; font-size: 8px; }
+.focus-realm__detail button { width: 100%; margin-top: 10px; border: 1px solid rgba(129,140,248,.26); border-radius: 9px; background: rgba(99,102,241,.13); color: #c7d2fe; padding: 8px 10px; cursor: pointer; font-size: 9px; font-weight: 700; }
+.focus-realm__detail button:hover { background: rgba(99,102,241,.24); }
+.focus-realm__detail button span { float: right; }
+.focus-realm__detail small { display: block; margin-top: 9px; color: #64748b; font-size: 8px; }
+.focus-realm__hint { position: absolute; z-index: 10; left: 16px; bottom: 15px; color: #64748b; font-size: 8px; }
+
+body.is-focus-realm .canvas-controls,
+body.is-focus-realm .canvas-hint,
+body.is-focus-realm #canvas-legend,
+body.is-focus-realm #scene { pointer-events: none; }
+body.is-focus-realm #scene { opacity: 0; transform: scale(.72); filter: blur(14px); transition: opacity .45s ease, filter .45s ease, transform .45s ease; }
+
+@keyframes realm-node-arrive {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.48); filter: blur(10px); }
+  60% { opacity: 1; transform: translate(-50%, -50%) scale(1.035); filter: blur(0); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes realm-flow { to { stroke-dashoffset: -30; } }
+@keyframes realm-stars { to { transform: translate3d(74px, 74px, 0); } }
+@keyframes realm-rotate { to { transform: rotate(360deg); } }
+@keyframes realm-breathe { 50% { transform: scale(1.08); opacity: .72; } }
+
+@media (max-width: 900px) {
+  .focus-count { display: none; }
+  .focus-nav { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .focus-node { --card-width: 190px; }
+  .focus-node--root { --card-width: 218px; }
+  .focus-realm__detail { width: 260px; }
+}
+@media (max-width: 680px) {
+  .focus-realm__detail { display: none; }
+  .focus-realm__hint { display: none; }
+  .focus-node { --card-width: 166px; min-height: 105px; padding: 9px; }
+  .focus-node--root { --card-width: 190px; }
+  .focus-node > p { display: none; }
+  .focus-breadcrumb button:not([aria-current="page"]):not(:last-child) { max-width: 80px; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .focus-realm, .focus-node, .focus-edge, .focus-realm::before, .focus-realm::after, .focus-realm__portal::after, .focus-realm__portal i, .focus-realm__mist { animation: none !important; transition-duration: .01ms !important; }
+}
