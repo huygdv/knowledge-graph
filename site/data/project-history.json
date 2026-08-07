@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "project": "Personal Engineering Knowledge Graph",
+  "entries": [
+    {
+      "date": "2026-08-07",
+      "version": "v0.2.2",
+      "title": "Responsive workspace, local authoring and public technical communication",
+      "summary": "Made the knowledge system practical across desktop, tablet and mobile while adding a safe daily capture workflow and durable architecture/history pages.",
+      "tags": ["responsive", "fullscreen", "knowledge-inbox", "system-design", "changelog"],
+      "changes": [
+        "Sidebar drawer and tablet/mobile layouts",
+        "Fullscreen canvas with native API and CSS fallback",
+        "Mobile bottom-sheet inspector",
+        "Local-first Quick Capture and Knowledge Inbox CRUD",
+        "JSON export and canonical proposal copy",
+        "System Design Overview page",
+        "Data-driven project changelog page"
+      ],
+      "commit": null
+    },
+    {
+      "date": "2026-08-07",
+      "version": "v0.2.1",
+      "title": "Focus Realm deep-dive projection",
+      "summary": "Introduced an immersive radial space that focuses on one node, its children and semantic neighbors with breadcrumb and back navigation.",
+      "tags": ["focus-realm", "deep-dive", "animation"],
+      "changes": ["Double-click deep dive", "Radial scoped layout", "Breadcrumb hierarchy", "Reduced-motion support"],
+      "commit": "55755a3fc084485ac8d476d9c8afbcd74d483950"
+    },
+    {
+      "date": "2026-08-06",
+      "version": "v0.2.0-polish",
+      "title": "Canvas visual polish",
+      "summary": "Improved text rendering and made the canvas background configurable with a quieter default.",
+      "tags": ["canvas", "accessibility", "visual-design"],
+      "changes": ["Plain default background", "Soft grid, dots and slate modes", "Zoom guard", "Pixel snapping"],
+      "commit": "64fc7419695dda6b0b13821332c19760918f0092"
+    },
+    {
+      "date": "2026-08-06",
+      "version": "v0.2.0",
+      "title": "Canonical graph and multi-projection architecture",
+      "summary": "Separated objective knowledge from personal mastery and career expectations, then expanded the graph into a deeper engineering library.",
+      "tags": ["schema-v2", "career-lens", "growth", "evidence"],
+      "changes": ["135 canonical nodes", "226 semantic relations", "Depth up to 6", "110 mastery assessments", "Fresher to Lead Backend profile"],
+      "commit": "ef7130a02b80ca6be3ffc17f4ce08fbdec7d8cf5"
+    },
+    {
+      "date": "2026-08-06",
+      "version": "v0.1.0",
+      "title": "Zero-build Knowledge Canvas MVP",
+      "summary": "Shipped the first usable static graph with search, filters, pan/zoom, inspector and GitHub Pages deployment.",
+      "tags": ["mvp", "zero-build", "github-pages"],
+      "changes": ["42 nodes", "54 relations", "Static JSON validation", "GitHub Pages workflow"],
+      "commit": "3d365a0"
+    }
+  ]
+}
