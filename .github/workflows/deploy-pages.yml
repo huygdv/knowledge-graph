@@ -29,11 +29,23 @@ jobs:
       - name: Validate knowledge graph
         run: python scripts/validate_data.py
 
+      - name: Validate project history
+        run: python -m json.tool site/data/project-history.json > /dev/null
+
       - name: Validate JavaScript syntax
         run: |
           node --check site/app.js
           node --check site/polish.js
           node --check site/focus-mode.js
+          node --check site/responsive-shell.js
+          node --check site/capture.js
+          node --check site/changelog/app.js
+
+      - name: Verify public documentation pages
+        run: |
+          test -f site/system-design-overview/index.html
+          test -f site/changelog/index.html
+          test -f site/docs.css
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
