@@ -31,11 +31,15 @@ jobs:
       - name: Validate knowledge graph
         run: python scripts/validate_data.py
 
-      - name: Validate project history
-        run: python -m json.tool site/data/project-history.json > /dev/null
+      - name: Validate JSON artifacts
+        run: |
+          python -m json.tool site/data/project-history.json > /dev/null
+          python -m json.tool site/templates/minimal.kg.json > /dev/null
+          python -m json.tool site/templates/example.kg.json > /dev/null
 
       - name: Validate JavaScript syntax
         run: |
+          node --check site/workspace-runtime.js
           node --check site/interaction-bridge.js
           node --check site/app.js
           node --check site/polish.js
@@ -44,21 +48,23 @@ jobs:
           node --check site/capture.js
           node --check site/interaction-mode.js
           node --check site/ux-hotfix-v024.js
+          node --check site/workspace-manager.js
           node --check site/changelog/app.js
 
-      - name: Verify interaction layer order
+      - name: Verify runtime layer order
         run: |
           python - <<'PY'
           from pathlib import Path
           html = Path('site/index.html').read_text()
-          required = ['interaction-bridge.js', 'app.js', 'focus-mode.js', 'responsive-shell.js', 'capture.js', 'interaction-mode.js', 'ux-hotfix-v024.js']
+          required = ['workspace-runtime.js', 'interaction-bridge.js', 'app.js', 'focus-mode.js', 'responsive-shell.js', 'capture.js', 'interaction-mode.js', 'ux-hotfix-v024.js', 'workspace-manager.js']
           positions = [html.index(name) for name in required]
-          assert positions == sorted(positions), 'interaction scripts are not loaded in the required order'
+          assert positions == sorted(positions), 'runtime scripts are not loaded in the required order'
           assert 'interaction-mode.css' in html
           assert 'ux-hotfix-v024.css' in html
+          assert 'workspace-manager.css' in html
           PY
 
-      - name: Browser smoke test interactions
+      - name: Browser smoke test interactions and workspaces
         shell: bash
         run: |
           set -euo pipefail
@@ -97,11 +103,37 @@ jobs:
             exit 1
           }
 
+          timeout 30s "$BROWSER" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --disable-background-networking \
+            --disable-default-apps \
+            --disable-extensions \
+            --disable-sync \
+            --no-first-run \
+            --window-size=1280,900 \
+            --virtual-time-budget=10000 \
+            --dump-dom \
+            http://127.0.0.1:8080/scripts/smoke-workspaces.html \
+            > /tmp/kg-workspaces-smoke.html
+
+          grep -q 'data-workspace-smoke-status="pass"' /tmp/kg-workspaces-smoke.html || {
+            echo 'Workspace smoke test failed:'
+            grep -o 'data-workspace-smoke-error="[^"]*"' /tmp/kg-workspaces-smoke.html || true
+            tail -100 /tmp/kg-workspaces-smoke.html || true
+            exit 1
+          }
+
       - name: Verify public documentation pages
         run: |
           test -f site/system-design-overview/index.html
           test -f site/changelog/index.html
           test -f site/docs.css
+          test -f docs/KNOWLEDGE_PACK_SCHEMA.md
+          test -f site/templates/minimal.kg.json
+          test -f site/templates/example.kg.json
 
       - name: Configure GitHub Pages
         if: github.event_name != 'pull_request'
