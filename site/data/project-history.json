@@ -1,7 +1,27 @@
 {
   "version": 1,
-  "project": "Personal Engineering Knowledge Graph",
+  "project": "Knowledge Graph",
   "entries": [
+    {
+      "date": "2026-08-11",
+      "version": "v0.3.0",
+      "title": "Reusable Knowledge Packs and local workspaces",
+      "summary": "Separated the canvas engine from the Fullstack dataset so users can bring their own structured research, validate and import it as a portable Knowledge Pack, persist multiple workspaces locally, and export them again.",
+      "tags": ["knowledge-packs", "workspaces", "indexeddb", "import-export", "templates", "browser-qa"],
+      "changes": [
+        "Fullstack Engineering became the built-in pack rather than the only product dataset",
+        "Added Workspace Manager for switch, create, rename, delete, import and export",
+        "Added portable .kg.json schema version 1.0",
+        "Added minimal and Agent Reliability example templates",
+        "Import performs validation and preview before any IndexedDB write",
+        "Multiple local workspaces persist in IndexedDB",
+        "Knowledge Inbox is isolated per workspace",
+        "Packs without career data use a safe General Explorer fallback",
+        "Workspace browser QA verifies manager UI, example preview, IndexedDB reload, custom rendering, export, inbox scoping and switch-back",
+        "Existing Deep Dive browser regression gate remains required"
+      ],
+      "commit": null
+    },
     {
       "date": "2026-08-07",
       "version": "v0.2.4.1",

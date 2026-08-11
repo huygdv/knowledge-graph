@@ -31,11 +31,15 @@ jobs:
       - name: Validate knowledge graph
         run: python scripts/validate_data.py
 
-      - name: Validate project history
-        run: python -m json.tool site/data/project-history.json > /dev/null
+      - name: Validate JSON artifacts
+        run: |
+          python -m json.tool site/data/project-history.json > /dev/null
+          python -m json.tool site/templates/minimal.kg.json > /dev/null
+          python -m json.tool site/templates/example.kg.json > /dev/null
 
       - name: Validate JavaScript syntax
         run: |
+          node --check site/workspace-runtime.js
           node --check site/interaction-bridge.js
           node --check site/app.js
           node --check site/polish.js
@@ -44,19 +48,33 @@ jobs:
           node --check site/capture.js
           node --check site/interaction-mode.js
           node --check site/ux-hotfix-v024.js
+          node --check site/workspace-manager.js
           node --check site/changelog/app.js
 
-      - name: Verify interaction layer order
+      - name: Verify runtime layer order
         run: |
           python - <<'PY'
           from pathlib import Path
           html = Path('site/index.html').read_text()
-          required = ['interaction-bridge.js', 'app.js', 'focus-mode.js', 'responsive-shell.js', 'capture.js', 'interaction-mode.js', 'ux-hotfix-v024.js']
+          required = ['workspace-runtime.js', 'interaction-bridge.js', 'app.js', 'focus-mode.js', 'responsive-shell.js', 'capture.js', 'interaction-mode.js', 'ux-hotfix-v024.js', 'workspace-manager.js']
           positions = [html.index(name) for name in required]
-          assert positions == sorted(positions), 'interaction scripts are not loaded in the required order'
+          assert positions == sorted(positions), 'runtime scripts are not loaded in the required order'
           assert 'interaction-mode.css' in html
           assert 'ux-hotfix-v024.css' in html
+          assert 'workspace-manager.css' in html
           PY
+
+      - name: Start smoke-test server
+        shell: bash
+        run: |
+          python -m http.server 8080 --bind 127.0.0.1 > /tmp/kg-http.log 2>&1 &
+          echo $! > /tmp/kg-http.pid
+          for i in {1..80}; do
+            curl -fsS http://127.0.0.1:8080/site/index.html > /dev/null && exit 0
+            sleep .1
+          done
+          cat /tmp/kg-http.log || true
+          exit 1
 
       - name: Browser smoke test interactions
         shell: bash
@@ -65,16 +83,7 @@ jobs:
           BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$BROWSER" || { echo 'No Chromium-compatible browser available'; exit 1; }
 
-          python -m http.server 8080 --bind 127.0.0.1 > /tmp/kg-http.log 2>&1 &
-          SERVER_PID=$!
-          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
-
-          for i in {1..40}; do
-            curl -fsS http://127.0.0.1:8080/site/index.html > /dev/null && break
-            sleep .1
-          done
-
-          timeout 25s "$BROWSER" \
+          timeout 60s "$BROWSER" \
             --headless=new \
             --no-sandbox \
             --disable-gpu \
@@ -84,8 +93,9 @@ jobs:
             --disable-extensions \
             --disable-sync \
             --no-first-run \
+            --user-data-dir=/tmp/kg-chrome-interactions \
             --window-size=1280,900 \
-            --virtual-time-budget=7000 \
+            --virtual-time-budget=8000 \
             --dump-dom \
             http://127.0.0.1:8080/scripts/smoke-interactions.html \
             > /tmp/kg-smoke.html
@@ -93,15 +103,91 @@ jobs:
           grep -q 'data-smoke-status="pass"' /tmp/kg-smoke.html || {
             echo 'Interaction smoke test failed:'
             grep -o 'data-smoke-error="[^"]*"' /tmp/kg-smoke.html || true
-            tail -80 /tmp/kg-smoke.html || true
+            tail -100 /tmp/kg-smoke.html || true
             exit 1
           }
+
+      - name: Browser smoke test Knowledge Packs
+        shell: bash
+        run: |
+          set -euo pipefail
+          BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$BROWSER" || { echo 'No Chromium-compatible browser available'; exit 1; }
+
+          "$BROWSER" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --disable-background-networking \
+            --disable-default-apps \
+            --disable-extensions \
+            --disable-sync \
+            --no-first-run \
+            --remote-debugging-address=127.0.0.1 \
+            --remote-debugging-port=9223 \
+            --user-data-dir=/tmp/kg-chrome-workspaces \
+            --window-size=1280,900 \
+            http://127.0.0.1:8080/scripts/smoke-workspaces.html \
+            > /tmp/kg-workspaces-browser.log 2>&1 &
+          CHROME_PID=$!
+          trap 'kill $CHROME_PID 2>/dev/null || true' EXIT
+
+          for i in {1..120}; do
+            curl -fsS http://127.0.0.1:9223/json/list > /tmp/kg-pages.json 2>/dev/null && break
+            sleep .1
+          done
+
+          for i in {1..400}; do
+            curl -fsS http://127.0.0.1:9223/json/list > /tmp/kg-pages.json 2>/dev/null || true
+            TITLE="$(python - <<'PY'
+          import json
+          try:
+              pages = json.load(open('/tmp/kg-pages.json'))
+              page = next((p for p in pages if 'smoke-workspaces.html' in p.get('url', '')), {})
+              print(page.get('title', ''))
+          except Exception:
+              print('')
+          PY
+          )"
+            case "$TITLE" in
+              "PASS: Knowledge Packs")
+                kill "$CHROME_PID" 2>/dev/null || true
+                wait "$CHROME_PID" 2>/dev/null || true
+                trap - EXIT
+                echo 'Knowledge Pack browser smoke: PASS'
+                exit 0
+                ;;
+              FAIL:*)
+                echo "Knowledge Pack browser smoke: $TITLE"
+                cat /tmp/kg-workspaces-browser.log || true
+                exit 1
+                ;;
+            esac
+            sleep .1
+          done
+
+          echo 'Knowledge Pack browser smoke timed out.'
+          echo 'Last observed DevTools pages:'
+          cat /tmp/kg-pages.json || true
+          echo 'Browser log:'
+          tail -120 /tmp/kg-workspaces-browser.log || true
+          exit 1
+
+      - name: Stop smoke-test server
+        if: always()
+        shell: bash
+        run: |
+          test -f /tmp/kg-http.pid && kill "$(cat /tmp/kg-http.pid)" 2>/dev/null || true
 
       - name: Verify public documentation pages
         run: |
           test -f site/system-design-overview/index.html
           test -f site/changelog/index.html
           test -f site/docs.css
+          test -f docs/KNOWLEDGE_PACK_SCHEMA.md
+          test -f site/templates/minimal.kg.json
+          test -f site/templates/example.kg.json
 
       - name: Configure GitHub Pages
         if: github.event_name != 'pull_request'

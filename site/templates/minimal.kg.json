@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "manifest": {
+    "id": "my-knowledge-pack",
+    "title": "My Knowledge Pack",
+    "description": "Replace this sample with a topic you want to structure and explore.",
+    "author": "",
+    "createdAt": "2026-08-11T00:00:00Z",
+    "updatedAt": "2026-08-11T00:00:00Z"
+  },
+  "graph": {
+    "version": 2,
+    "meta": {
+      "id": "my-knowledge-pack",
+      "title": "My Knowledge Pack",
+      "description": "Canonical knowledge only. Personal mastery belongs in overlay."
+    },
+    "nodes": [
+      {
+        "id": "domain.my-topic",
+        "kind": "domain",
+        "title": "My Topic",
+        "summary": "The root subject of this knowledge map.",
+        "tags": ["topic"]
+      },
+      {
+        "id": "concept.first-principle",
+        "kind": "concept",
+        "title": "First Principle",
+        "summary": "A core idea that helps explain the subject.",
+        "tags": ["foundation"]
+      },
+      {
+        "id": "technique.example-method",
+        "kind": "technique",
+        "title": "Example Method",
+        "summary": "A method or technique used to apply the concept.",
+        "tags": ["practice"]
+      }
+    ],
+    "edges": [
+      { "id": "edge.topic-principle", "kind": "contains", "source": "domain.my-topic", "target": "concept.first-principle" },
+      { "id": "edge.principle-method", "kind": "contains", "source": "concept.first-principle", "target": "technique.example-method" }
+    ]
+  },
+  "overlay": {
+    "version": 1,
+    "id": "overlay.my-knowledge-pack",
+    "assessments": []
+  },
+  "profiles": [],
+  "views": {
+    "defaultMode": "library",
+    "defaultDepth": 3
+  },
+  "inbox": []
+}

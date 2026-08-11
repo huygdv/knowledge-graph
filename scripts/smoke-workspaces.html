@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RUNNING: Knowledge Pack workspace smoke test</title>
+  <style>html,body{margin:0;height:100%;font:14px system-ui,sans-serif}iframe{width:100%;height:100%;border:0}#status{position:fixed;z-index:9999;left:8px;top:8px;padding:6px 9px;background:#fff;border:1px solid #ccc}</style>
+</head>
+<body data-workspace-smoke-status="running">
+  <div id="status">running</div>
+  <iframe id="app" src="../site/index.html?workspace-smoke=1"></iframe>
+  <script>
+    const frame = document.querySelector('#app');
+    const status = document.querySelector('#status');
+    const TEST_ID = 'smoke-imported-pack';
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    function fail(message) {
+      document.body.dataset.workspaceSmokeStatus = 'fail';
+      document.body.dataset.workspaceSmokeError = message;
+      document.title = `FAIL: ${message}`;
+      status.textContent = `FAIL: ${message}`;
+      throw new Error(message);
+    }
+    async function waitFor(check, label, timeout = 7000) {
+      const started = performance.now();
+      while (performance.now() - started < timeout) {
+        try {
+          const value = check();
+          if (value) return value;
+        } catch {}
+        await sleep(30);
+      }
+      fail(`timeout waiting for ${label}`);
+    }
+    async function initialLoad() {
+      await waitFor(() => frame.contentWindow?.KGWorkspace, 'initial workspace runtime');
+    }
+    async function navigateFrame(src, marker) {
+      frame.src = src;
+      await waitFor(() => {
+        try { return frame.contentWindow.location.search.includes(marker); }
+        catch { return false; }
+      }, `iframe navigation ${marker}`);
+      await waitFor(() => frame.contentWindow?.KGWorkspace, `workspace runtime after ${marker}`);
+    }
+    function samplePack() {
+      const now = new Date().toISOString();
+      return {
+        schemaVersion: '1.0',
+        manifest: { id: TEST_ID, title: 'Smoke Imported Pack', description: 'Workspace smoke fixture', createdAt: now, updatedAt: now },
+        graph: {
+          version: 2,
+          meta: { id: TEST_ID, title: 'Smoke Imported Pack', description: 'Workspace smoke fixture' },
+          nodes: [
+            { id: 'domain.smoke', kind: 'domain', title: 'Smoke Domain', summary: 'Root for imported workspace.' },
+            { id: 'concept.smoke-child', kind: 'concept', title: 'Imported Concept', summary: 'This node proves virtual fetch switched the graph.' }
+          ],
+          edges: [{ id: 'edge.smoke', kind: 'contains', source: 'domain.smoke', target: 'concept.smoke-child' }]
+        },
+        overlay: { version: 1, id: 'overlay.smoke', assessments: [] },
+        profiles: [],
+        views: { defaultMode: 'library', defaultDepth: 3 },
+        inbox: [{ id: 'draft.smoke', title: 'Smoke draft', note: 'Per-workspace inbox fixture', kind: 'concept', tags: [], status: 'inbox' }]
+      };
+    }
+
+    async function verifyManagerUi(doc) {
+      const switcherButton = await waitFor(() => doc.querySelector('.workspace-switcher'), 'workspace switcher button');
+      switcherButton.click();
+      const dialog = await waitFor(() => {
+        const candidate = doc.querySelector('#workspace-dialog');
+        return candidate?.open ? candidate : null;
+      }, 'workspace manager dialog');
+      if (!dialog.querySelector('a[href="./templates/minimal.kg.json"]')) fail('minimal template link is missing');
+      if (!dialog.querySelector('a[href="./templates/example.kg.json"]')) fail('example template link is missing');
+      dialog.querySelector('[data-workspace-action="example"]')?.click();
+      await waitFor(() => dialog.querySelector('.workspace-import-preview:not([hidden]) .workspace-import-confirm'), 'valid example import preview');
+      dialog.close();
+    }
+
+    async function run() {
+      await initialLoad();
+      let win = frame.contentWindow;
+      let doc = frame.contentDocument;
+      const runtime = win.KGWorkspace;
+
+      await verifyManagerUi(doc);
+
+      const invalid = runtime.validatePack({ schemaVersion: '1.0', manifest: { id: 'xx', title: 'Bad' }, graph: { version: 2, nodes: [{ id: 'a', kind: 'concept', title: 'A' }], edges: [{ kind: 'contains', source: 'a', target: 'missing' }] } });
+      if (invalid.valid) fail('invalid pack passed validation');
+
+      await runtime.deleteWorkspace(TEST_ID).catch(() => {});
+      await runtime.activateImportedPack(samplePack());
+      if (runtime.getActiveId() !== TEST_ID) fail('import did not activate workspace');
+
+      await navigateFrame('../site/index.html?workspace-smoke=2', 'workspace-smoke=2');
+      win = frame.contentWindow; doc = frame.contentDocument;
+      await waitFor(() => doc.querySelector('#nodes-layer .knowledge-node[data-id="concept.smoke-child"]'), 'imported graph node');
+      const switcher = await waitFor(() => doc.querySelector('.workspace-switcher strong'), 'workspace switcher');
+      if (!/Smoke Imported Pack/.test(switcher.textContent)) fail(`workspace switcher did not show imported pack: ${switcher.textContent}`);
+
+      const activeRuntime = win.KGWorkspace;
+      const saved = await activeRuntime.getPack(TEST_ID);
+      if (!saved || saved.graph.nodes.length !== 2) fail('IndexedDB workspace was not persisted');
+      const exported = await activeRuntime.exportActivePack();
+      if (exported.schemaVersion !== '1.0' || exported.graph.nodes.length !== 2) fail('exported pack is not portable');
+      if (!activeRuntime.inboxKey().includes(TEST_ID)) fail('inbox storage is not scoped per workspace');
+
+      activeRuntime.setActiveId(activeRuntime.BUILTIN_ID);
+      await navigateFrame('../site/index.html?workspace-smoke=3', 'workspace-smoke=3');
+      win = frame.contentWindow; doc = frame.contentDocument;
+      await waitFor(() => doc.querySelector('#nodes-layer .knowledge-node'), 'built-in graph after switch back');
+      if (doc.querySelector('#nodes-layer .knowledge-node[data-id="concept.smoke-child"]')) fail('custom node leaked into built-in workspace');
+      await win.KGWorkspace.deleteWorkspace(TEST_ID);
+
+      document.body.dataset.workspaceSmokeStatus = 'pass';
+      document.title = 'PASS: Knowledge Packs';
+      status.textContent = 'PASS';
+    }
+
+    run().catch((error) => {
+      if (document.body.dataset.workspaceSmokeStatus !== 'fail') {
+        const message = error.message || String(error);
+        document.body.dataset.workspaceSmokeStatus = 'fail';
+        document.body.dataset.workspaceSmokeError = message;
+        document.title = `FAIL: ${message}`;
+        status.textContent = `FAIL: ${message}`;
+      }
+      console.error(error);
+    });
+  </script>
+</body>
+</html>
