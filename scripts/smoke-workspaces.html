@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Knowledge Pack workspace smoke test</title>
+  <title>RUNNING: Knowledge Pack workspace smoke test</title>
   <style>html,body{margin:0;height:100%;font:14px system-ui,sans-serif}iframe{width:100%;height:100%;border:0}#status{position:fixed;z-index:9999;left:8px;top:8px;padding:6px 9px;background:#fff;border:1px solid #ccc}</style>
 </head>
 <body data-workspace-smoke-status="running">
@@ -18,6 +18,7 @@
     function fail(message) {
       document.body.dataset.workspaceSmokeStatus = 'fail';
       document.body.dataset.workspaceSmokeError = message;
+      document.title = `FAIL: ${message}`;
       status.textContent = `FAIL: ${message}`;
       throw new Error(message);
     }
@@ -98,14 +99,17 @@
       await win.KGWorkspace.deleteWorkspace(TEST_ID);
 
       document.body.dataset.workspaceSmokeStatus = 'pass';
+      document.title = 'PASS: Knowledge Packs';
       status.textContent = 'PASS';
     }
 
     run().catch((error) => {
       if (document.body.dataset.workspaceSmokeStatus !== 'fail') {
+        const message = error.message || String(error);
         document.body.dataset.workspaceSmokeStatus = 'fail';
-        document.body.dataset.workspaceSmokeError = error.message || String(error);
-        status.textContent = `FAIL: ${error.message || error}`;
+        document.body.dataset.workspaceSmokeError = message;
+        document.title = `FAIL: ${message}`;
+        status.textContent = `FAIL: ${message}`;
       }
       console.error(error);
     });
