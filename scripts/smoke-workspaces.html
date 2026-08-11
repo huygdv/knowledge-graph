@@ -65,11 +65,27 @@
       };
     }
 
+    async function verifyManagerUi(doc) {
+      const switcherButton = await waitFor(() => doc.querySelector('.workspace-switcher'), 'workspace switcher button');
+      switcherButton.click();
+      const dialog = await waitFor(() => {
+        const candidate = doc.querySelector('#workspace-dialog');
+        return candidate?.open ? candidate : null;
+      }, 'workspace manager dialog');
+      if (!dialog.querySelector('a[href="./templates/minimal.kg.json"]')) fail('minimal template link is missing');
+      if (!dialog.querySelector('a[href="./templates/example.kg.json"]')) fail('example template link is missing');
+      dialog.querySelector('[data-workspace-action="example"]')?.click();
+      await waitFor(() => dialog.querySelector('.workspace-import-preview:not([hidden]) .workspace-import-confirm'), 'valid example import preview');
+      dialog.close();
+    }
+
     async function run() {
       await initialLoad();
       let win = frame.contentWindow;
       let doc = frame.contentDocument;
       const runtime = win.KGWorkspace;
+
+      await verifyManagerUi(doc);
 
       const invalid = runtime.validatePack({ schemaVersion: '1.0', manifest: { id: 'xx', title: 'Bad' }, graph: { version: 2, nodes: [{ id: 'a', kind: 'concept', title: 'A' }], edges: [{ kind: 'contains', source: 'a', target: 'missing' }] } });
       if (invalid.valid) fail('invalid pack passed validation');
