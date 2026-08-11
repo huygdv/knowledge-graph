@@ -64,23 +64,26 @@ jobs:
           assert 'workspace-manager.css' in html
           PY
 
-      - name: Browser smoke test interactions and workspaces
+      - name: Start smoke-test server
+        shell: bash
+        run: |
+          python -m http.server 8080 --bind 127.0.0.1 > /tmp/kg-http.log 2>&1 &
+          echo $! > /tmp/kg-http.pid
+          for i in {1..80}; do
+            curl -fsS http://127.0.0.1:8080/site/index.html > /dev/null && exit 0
+            sleep .1
+          done
+          cat /tmp/kg-http.log || true
+          exit 1
+
+      - name: Browser smoke test interactions
         shell: bash
         run: |
           set -euo pipefail
           BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$BROWSER" || { echo 'No Chromium-compatible browser available'; exit 1; }
 
-          python -m http.server 8080 --bind 127.0.0.1 > /tmp/kg-http.log 2>&1 &
-          SERVER_PID=$!
-          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
-
-          for i in {1..40}; do
-            curl -fsS http://127.0.0.1:8080/site/index.html > /dev/null && break
-            sleep .1
-          done
-
-          timeout 25s "$BROWSER" \
+          timeout 60s "$BROWSER" \
             --headless=new \
             --no-sandbox \
             --disable-gpu \
@@ -90,8 +93,9 @@ jobs:
             --disable-extensions \
             --disable-sync \
             --no-first-run \
+            --user-data-dir=/tmp/kg-chrome-interactions \
             --window-size=1280,900 \
-            --virtual-time-budget=7000 \
+            --virtual-time-budget=8000 \
             --dump-dom \
             http://127.0.0.1:8080/scripts/smoke-interactions.html \
             > /tmp/kg-smoke.html
@@ -99,11 +103,18 @@ jobs:
           grep -q 'data-smoke-status="pass"' /tmp/kg-smoke.html || {
             echo 'Interaction smoke test failed:'
             grep -o 'data-smoke-error="[^"]*"' /tmp/kg-smoke.html || true
-            tail -80 /tmp/kg-smoke.html || true
+            tail -100 /tmp/kg-smoke.html || true
             exit 1
           }
 
-          timeout 30s "$BROWSER" \
+      - name: Browser smoke test Knowledge Packs
+        shell: bash
+        run: |
+          set -euo pipefail
+          BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$BROWSER" || { echo 'No Chromium-compatible browser available'; exit 1; }
+
+          timeout 75s "$BROWSER" \
             --headless=new \
             --no-sandbox \
             --disable-gpu \
@@ -113,8 +124,9 @@ jobs:
             --disable-extensions \
             --disable-sync \
             --no-first-run \
+            --user-data-dir=/tmp/kg-chrome-workspaces \
             --window-size=1280,900 \
-            --virtual-time-budget=10000 \
+            --virtual-time-budget=12000 \
             --dump-dom \
             http://127.0.0.1:8080/scripts/smoke-workspaces.html \
             > /tmp/kg-workspaces-smoke.html
@@ -122,9 +134,15 @@ jobs:
           grep -q 'data-workspace-smoke-status="pass"' /tmp/kg-workspaces-smoke.html || {
             echo 'Workspace smoke test failed:'
             grep -o 'data-workspace-smoke-error="[^"]*"' /tmp/kg-workspaces-smoke.html || true
-            tail -100 /tmp/kg-workspaces-smoke.html || true
+            tail -120 /tmp/kg-workspaces-smoke.html || true
             exit 1
           }
+
+      - name: Stop smoke-test server
+        if: always()
+        shell: bash
+        run: |
+          test -f /tmp/kg-http.pid && kill "$(cat /tmp/kg-http.pid)" 2>/dev/null || true
 
       - name: Verify public documentation pages
         run: |
