@@ -4,6 +4,33 @@ The public, data-driven timeline is available at:
 
 - https://huygdv.github.io/knowledge-graph/changelog/
 
+## v0.3.0 — 2026-08-11
+
+### Added
+
+- Reframed the product as a reusable **Knowledge Graph engine** with independent **Knowledge Packs / Workspaces**.
+- Fullstack Engineering remains available as the built-in pack instead of being hard-coded as the only product dataset.
+- Added Workspace Manager with switch, create blank, rename, delete, import, export, and example-preview flows.
+- Added portable `.kg.json` schema version `1.0` with manifest, canonical graph, overlay, optional profiles, view hints, and inbox data.
+- Added downloadable minimal and worked example templates for converting existing research into importable structured maps.
+- Added IndexedDB-backed persistence for multiple local workspaces.
+- Added per-workspace Knowledge Inbox isolation.
+- Added neutral General Explorer profile fallback so domain packs without career data still use the same canvas engine safely.
+- Added [`docs/KNOWLEDGE_PACK_SCHEMA.md`](docs/KNOWLEDGE_PACK_SCHEMA.md).
+
+### Import safety
+
+- Imports are validated and previewed before persistence.
+- Validation covers schema compatibility, duplicate IDs, relation kinds, dangling edges, hierarchy cycles/multiple parents, canonical/personal separation, overlay references, mastery range, and profile references.
+- Invalid packs never write to IndexedDB.
+
+### Verification
+
+- Existing Chromium Deep Dive regression smoke remains required.
+- Added long-lived Chromium workspace smoke for IndexedDB flows.
+- Workspace browser QA verifies the real Workspace Manager, template links, `Use example` validation preview, custom pack persistence across reload, custom graph rendering, portable export, workspace-scoped inbox, switching back to the built-in pack, and cleanup.
+- Pull request #2 is gated on both browser suites before merge.
+
 ## v0.2.4.1 — 2026-08-07
 
 ### Fixed
