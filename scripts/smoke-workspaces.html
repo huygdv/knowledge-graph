@@ -30,7 +30,16 @@
       }
       fail(`timeout waiting for ${label}`);
     }
-    async function waitLoad() { await new Promise((resolve) => frame.addEventListener('load', resolve, { once: true })); }
+    function nextLoad() { return new Promise((resolve) => frame.addEventListener('load', resolve, { once: true })); }
+    async function initialLoad() {
+      if (frame.contentDocument?.readyState === 'complete' && frame.contentWindow?.KGWorkspace) return;
+      await nextLoad();
+    }
+    async function navigateFrame(src) {
+      const loaded = nextLoad();
+      frame.src = src;
+      await loaded;
+    }
     function samplePack() {
       const now = new Date().toISOString();
       return {
@@ -53,7 +62,7 @@
     }
 
     async function run() {
-      await waitLoad();
+      await initialLoad();
       let win = frame.contentWindow;
       let doc = frame.contentDocument;
       const runtime = await waitFor(() => win.KGWorkspace, 'workspace runtime');
@@ -65,8 +74,7 @@
       await runtime.activateImportedPack(samplePack());
       if (runtime.getActiveId() !== TEST_ID) fail('import did not activate workspace');
 
-      frame.src = '../site/index.html?workspace-smoke=2';
-      await waitLoad();
+      await navigateFrame('../site/index.html?workspace-smoke=2');
       win = frame.contentWindow; doc = frame.contentDocument;
       await waitFor(() => doc.querySelector('#nodes-layer .knowledge-node[data-id="concept.smoke-child"]'), 'imported graph node');
       const switcher = await waitFor(() => doc.querySelector('.workspace-switcher strong'), 'workspace switcher');
@@ -80,8 +88,7 @@
       if (!activeRuntime.inboxKey().includes(TEST_ID)) fail('inbox storage is not scoped per workspace');
 
       activeRuntime.setActiveId(activeRuntime.BUILTIN_ID);
-      frame.src = '../site/index.html?workspace-smoke=3';
-      await waitLoad();
+      await navigateFrame('../site/index.html?workspace-smoke=3');
       win = frame.contentWindow; doc = frame.contentDocument;
       await waitFor(() => doc.querySelector('#nodes-layer .knowledge-node'), 'built-in graph after switch back');
       if (doc.querySelector('#nodes-layer .knowledge-node[data-id="concept.smoke-child"]')) fail('custom node leaked into built-in workspace');
