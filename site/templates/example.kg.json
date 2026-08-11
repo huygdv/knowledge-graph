@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "manifest": {
+    "id": "agent-reliability-research",
+    "title": "Agent Reliability Research",
+    "description": "Example of converting research notes into a systematic knowledge map.",
+    "author": "Example",
+    "createdAt": "2026-08-11T00:00:00Z",
+    "updatedAt": "2026-08-11T00:00:00Z"
+  },
+  "graph": {
+    "version": 2,
+    "meta": {
+      "id": "agent-reliability-research",
+      "title": "Agent Reliability Research",
+      "description": "A small example Knowledge Pack for systematic research communication."
+    },
+    "nodes": [
+      { "id": "domain.agent-reliability", "kind": "domain", "title": "Agent Reliability", "summary": "How agentic systems remain correct, observable and recoverable under real-world failures.", "tags": ["agents", "reliability"] },
+      { "id": "capability.failure-model", "kind": "capability", "title": "Failure Model", "summary": "Identify where an agent can fail across model, context, tools and orchestration.", "tags": ["failure"] },
+      { "id": "concept.tool-failure", "kind": "concept", "title": "Tool Failure", "summary": "Tools can timeout, reject inputs, return partial data or produce ambiguous errors.", "tags": ["tools"] },
+      { "id": "concept.context-drift", "kind": "concept", "title": "Context Drift", "summary": "Long-running tasks can accumulate irrelevant or contradictory context.", "tags": ["context"] },
+      { "id": "concept.retry-budget", "kind": "concept", "title": "Retry Budget", "summary": "Retries need explicit limits so recovery attempts do not amplify cost or failure.", "tags": ["retry"] },
+      { "id": "technique.trace-evaluation", "kind": "technique", "title": "Trace Evaluation", "summary": "Evaluate complete agent traces to locate failure patterns and regressions.", "tags": ["evaluation"] },
+      { "id": "pattern.human-approval", "kind": "pattern", "title": "Human Approval Gate", "summary": "Require explicit approval before high-impact or irreversible actions.", "tags": ["safety"] },
+      { "id": "technique.failure-taxonomy", "kind": "technique", "title": "Failure Taxonomy", "summary": "Classify failures consistently so fixes target the correct system layer.", "tags": ["debugging"] },
+      { "id": "artifact.production-traces", "kind": "artifact", "title": "Production Trace Dataset", "summary": "A curated evidence set used to test and communicate observed agent failure modes.", "tags": ["evidence"] }
+    ],
+    "edges": [
+      { "id": "e1", "kind": "contains", "source": "domain.agent-reliability", "target": "capability.failure-model" },
+      { "id": "e2", "kind": "contains", "source": "capability.failure-model", "target": "concept.tool-failure" },
+      { "id": "e3", "kind": "contains", "source": "capability.failure-model", "target": "concept.context-drift" },
+      { "id": "e4", "kind": "contains", "source": "capability.failure-model", "target": "concept.retry-budget" },
+      { "id": "e5", "kind": "contains", "source": "domain.agent-reliability", "target": "technique.trace-evaluation" },
+      { "id": "e6", "kind": "contains", "source": "domain.agent-reliability", "target": "pattern.human-approval" },
+      { "id": "e7", "kind": "contains", "source": "technique.trace-evaluation", "target": "technique.failure-taxonomy" },
+      { "id": "e8", "kind": "requires", "source": "technique.trace-evaluation", "target": "capability.failure-model" },
+      { "id": "e9", "kind": "relates_to", "source": "concept.retry-budget", "target": "concept.tool-failure" },
+      { "id": "e10", "kind": "applied_in", "source": "technique.trace-evaluation", "target": "artifact.production-traces" },
+      { "id": "e11", "kind": "applied_in", "source": "technique.failure-taxonomy", "target": "artifact.production-traces" }
+    ]
+  },
+  "overlay": {
+    "version": 1,
+    "id": "overlay.agent-reliability-research",
+    "assessments": []
+  },
+  "profiles": [],
+  "views": {
+    "defaultMode": "library",
+    "defaultDepth": 4
+  },
+  "inbox": [
+    {
+      "id": "draft.example-observation",
+      "title": "Provider outage vs agent-design failure",
+      "note": "Keep external provider failures separate from orchestration failures in the taxonomy.",
+      "kind": "concept",
+      "suggestedDomain": "domain.agent-reliability",
+      "tags": ["failure-taxonomy"],
+      "relatedNodeId": "technique.failure-taxonomy",
+      "status": "inbox",
+      "createdAt": "2026-08-11T00:00:00Z",
+      "updatedAt": "2026-08-11T00:00:00Z"
+    }
+  ]
+}
