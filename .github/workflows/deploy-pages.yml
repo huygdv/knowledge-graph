@@ -114,7 +114,7 @@ jobs:
           BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$BROWSER" || { echo 'No Chromium-compatible browser available'; exit 1; }
 
-          timeout 75s "$BROWSER" \
+          "$BROWSER" \
             --headless=new \
             --no-sandbox \
             --disable-gpu \
@@ -124,19 +124,55 @@ jobs:
             --disable-extensions \
             --disable-sync \
             --no-first-run \
+            --remote-debugging-address=127.0.0.1 \
+            --remote-debugging-port=9223 \
             --user-data-dir=/tmp/kg-chrome-workspaces \
             --window-size=1280,900 \
-            --virtual-time-budget=12000 \
-            --dump-dom \
             http://127.0.0.1:8080/scripts/smoke-workspaces.html \
-            > /tmp/kg-workspaces-smoke.html
+            > /tmp/kg-workspaces-browser.log 2>&1 &
+          CHROME_PID=$!
+          trap 'kill $CHROME_PID 2>/dev/null || true' EXIT
 
-          grep -q 'data-workspace-smoke-status="pass"' /tmp/kg-workspaces-smoke.html || {
-            echo 'Workspace smoke test failed:'
-            grep -o 'data-workspace-smoke-error="[^"]*"' /tmp/kg-workspaces-smoke.html || true
-            tail -120 /tmp/kg-workspaces-smoke.html || true
-            exit 1
-          }
+          for i in {1..120}; do
+            curl -fsS http://127.0.0.1:9223/json/list > /tmp/kg-pages.json 2>/dev/null && break
+            sleep .1
+          done
+
+          for i in {1..400}; do
+            curl -fsS http://127.0.0.1:9223/json/list > /tmp/kg-pages.json 2>/dev/null || true
+            TITLE="$(python - <<'PY'
+          import json
+          try:
+              pages = json.load(open('/tmp/kg-pages.json'))
+              page = next((p for p in pages if 'smoke-workspaces.html' in p.get('url', '')), {})
+              print(page.get('title', ''))
+          except Exception:
+              print('')
+          PY
+          )"
+            case "$TITLE" in
+              "PASS: Knowledge Packs")
+                kill "$CHROME_PID" 2>/dev/null || true
+                wait "$CHROME_PID" 2>/dev/null || true
+                trap - EXIT
+                echo 'Knowledge Pack browser smoke: PASS'
+                exit 0
+                ;;
+              FAIL:*)
+                echo "Knowledge Pack browser smoke: $TITLE"
+                cat /tmp/kg-workspaces-browser.log || true
+                exit 1
+                ;;
+            esac
+            sleep .1
+          done
+
+          echo 'Knowledge Pack browser smoke timed out.'
+          echo 'Last observed DevTools pages:'
+          cat /tmp/kg-pages.json || true
+          echo 'Browser log:'
+          tail -120 /tmp/kg-workspaces-browser.log || true
+          exit 1
 
       - name: Stop smoke-test server
         if: always()
