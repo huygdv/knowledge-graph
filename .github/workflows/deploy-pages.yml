@@ -36,6 +36,7 @@ jobs:
           python -m json.tool site/data/project-history.json > /dev/null
           python -m json.tool site/templates/minimal.kg.json > /dev/null
           python -m json.tool site/templates/example.kg.json > /dev/null
+          python -m json.tool site/templates/mentorship-founder-product-builder.kg.json > /dev/null
 
       - name: Validate JavaScript syntax
         run: |
@@ -49,6 +50,7 @@ jobs:
           node --check site/interaction-mode.js
           node --check site/ux-hotfix-v024.js
           node --check site/workspace-manager.js
+          node --check site/mentorship-pack.js
           node --check site/changelog/app.js
 
       - name: Verify runtime layer order
@@ -56,7 +58,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           html = Path('site/index.html').read_text()
-          required = ['workspace-runtime.js', 'interaction-bridge.js', 'app.js', 'focus-mode.js', 'responsive-shell.js', 'capture.js', 'interaction-mode.js', 'ux-hotfix-v024.js', 'workspace-manager.js']
+          required = ['workspace-runtime.js', 'interaction-bridge.js', 'app.js', 'focus-mode.js', 'responsive-shell.js', 'capture.js', 'interaction-mode.js', 'ux-hotfix-v024.js', 'workspace-manager.js', 'mentorship-pack.js']
           positions = [html.index(name) for name in required]
           assert positions == sorted(positions), 'runtime scripts are not loaded in the required order'
           assert 'interaction-mode.css' in html
@@ -188,6 +190,7 @@ jobs:
           test -f docs/KNOWLEDGE_PACK_SCHEMA.md
           test -f site/templates/minimal.kg.json
           test -f site/templates/example.kg.json
+          test -f site/templates/mentorship-founder-product-builder.kg.json
 
       - name: Configure GitHub Pages
         if: github.event_name != 'pull_request'
