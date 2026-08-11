@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RUNNING: Mentorship pack smoke</title>
+  <style>html,body{margin:0;height:100%;font:14px system-ui,sans-serif}iframe{width:100%;height:100%;border:0}#status{position:fixed;z-index:9999;left:8px;top:8px;padding:6px 9px;background:#fff;border:1px solid #ccc}</style>
+</head>
+<body data-mentorship-smoke-status="running">
+  <div id="status">running</div>
+  <iframe id="app" src="../site/index.html?mentorship-smoke=1"></iframe>
+  <script>
+    const frame = document.querySelector('#app');
+    const status = document.querySelector('#status');
+    const PACK_ID = 'mentorship-founder-product-builder';
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    function fail(message) {
+      document.body.dataset.mentorshipSmokeStatus = 'fail';
+      document.body.dataset.mentorshipSmokeError = message;
+      document.title = `FAIL: ${message}`;
+      status.textContent = `FAIL: ${message}`;
+      throw new Error(message);
+    }
+
+    async function waitFor(check, label, timeout = 10000) {
+      const started = performance.now();
+      while (performance.now() - started < timeout) {
+        try {
+          const value = check();
+          if (value) return value;
+        } catch {}
+        await sleep(40);
+      }
+      fail(`timeout waiting for ${label}`);
+    }
+
+    async function run() {
+      await waitFor(() => frame.contentWindow?.KGWorkspace, 'workspace runtime');
+      let win = frame.contentWindow;
+      let doc = frame.contentDocument;
+      let runtime = win.KGWorkspace;
+
+      runtime.setActiveId(runtime.BUILTIN_ID);
+      await runtime.deleteWorkspace(PACK_ID).catch(() => {});
+
+      const switcher = await waitFor(() => doc.querySelector('.workspace-switcher'), 'workspace switcher');
+      switcher.click();
+      const dialog = await waitFor(() => doc.querySelector('#workspace-dialog[open]'), 'workspace manager');
+      const mentorshipButton = await waitFor(() => dialog.querySelector('[data-mentorship-pack="use"]'), 'mentorship use button');
+      const downloadLink = dialog.querySelector('a[data-mentorship-pack="download"]');
+      if (!downloadLink || !/mentorship-founder-product-builder\.kg\.json$/.test(downloadLink.getAttribute('href'))) fail('mentorship download link missing');
+
+      win.confirm = () => true;
+      mentorshipButton.click();
+
+      await waitFor(() => {
+        try { return frame.contentWindow?.KGWorkspace?.getActiveId() === PACK_ID; } catch { return false; }
+      }, 'mentorship workspace activation');
+
+      await waitFor(() => {
+        try { return frame.contentDocument.querySelector('#nodes-layer .knowledge-node[data-id="artifact.session-20"]'); } catch { return false; }
+      }, 'session 20 node render', 15000);
+
+      win = frame.contentWindow;
+      doc = frame.contentDocument;
+      runtime = win.KGWorkspace;
+      const saved = await runtime.getPack(PACK_ID);
+      if (!saved) fail('mentorship pack was not persisted');
+      const sessions = saved.graph.nodes.filter((node) => node.tags?.includes('session'));
+      if (sessions.length !== 20) fail(`expected 20 sessions, got ${sessions.length}`);
+      if (saved.profiles?.[0]?.levels?.length !== 4) fail('autonomy rubric does not have 4 levels');
+      if (!saved.graph.nodes.some((node) => node.id === 'artifact.student-product')) fail('real product capstone missing');
+      if (!saved.graph.nodes.some((node) => node.id === 'artifact.exit-criteria')) fail('program exit criteria missing');
+
+      const careerOptions = await waitFor(() => {
+        const options = doc.querySelectorAll('#career-level option');
+        return options.length >= 4 ? options : null;
+      }, 'autonomy rubric options');
+      if (careerOptions.length < 4) fail('career/autonomy lens did not load rubric levels');
+
+      runtime.setActiveId(runtime.BUILTIN_ID);
+      await runtime.deleteWorkspace(PACK_ID);
+
+      document.body.dataset.mentorshipSmokeStatus = 'pass';
+      document.title = 'PASS: Mentorship Pack';
+      status.textContent = 'PASS';
+    }
+
+    run().catch((error) => {
+      if (document.body.dataset.mentorshipSmokeStatus !== 'fail') {
+        const message = error.message || String(error);
+        document.body.dataset.mentorshipSmokeStatus = 'fail';
+        document.body.dataset.mentorshipSmokeError = message;
+        document.title = `FAIL: ${message}`;
+        status.textContent = `FAIL: ${message}`;
+      }
+      console.error(error);
+    });
+  </script>
+</body>
+</html>
