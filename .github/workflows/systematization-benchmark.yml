@@ -1,0 +1,62 @@
+name: Systematization Benchmark
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'benchmarks/**'
+      - 'docs/SYSTEMATIZATION_*.md'
+      - 'docs/V0.4_*.md'
+      - 'scripts/evaluate_systematization.py'
+      - '.github/workflows/systematization-benchmark.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'benchmarks/**'
+      - 'docs/SYSTEMATIZATION_*.md'
+      - 'docs/V0.4_*.md'
+      - 'scripts/evaluate_systematization.py'
+      - '.github/workflows/systematization-benchmark.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark-foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate benchmark JSON
+        run: |
+          python -m json.tool benchmarks/cases/001-agent-harness-systematization/expected-structure.json > /dev/null
+          python -m json.tool benchmarks/cases/001-agent-harness-systematization/gold.draft.json > /dev/null
+
+      - name: Validate evaluator syntax
+        run: python -m py_compile scripts/evaluate_systematization.py
+
+      - name: Evaluate gold fixture
+        run: |
+          python scripts/evaluate_systematization.py \
+            --case benchmarks/cases/001-agent-harness-systematization \
+            --draft benchmarks/cases/001-agent-harness-systematization/gold.draft.json \
+            --output /tmp/benchmark-001-report.json \
+            --strict
+          cat /tmp/benchmark-001-report.json
+
+      - name: Verify strategy artifacts
+        run: |
+          test -f docs/V0.4_SYSTEMATIZATION_EXPERIMENT.md
+          test -f docs/SYSTEMATIZATION_DRAFT_CONTRACT.md
+          test -f docs/SYSTEMATIZATION_EVALUATION.md
+          test -f docs/V0.4_IMPLEMENTATION_BACKLOG.md
+          test -f benchmarks/README.md
+          test -f benchmarks/cases/001-agent-harness-systematization/input.md
+          test -f benchmarks/cases/001-agent-harness-systematization/notes.md

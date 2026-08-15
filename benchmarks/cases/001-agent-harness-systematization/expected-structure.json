@@ -1,0 +1,58 @@
+{
+  "benchmarkVersion": "0.1",
+  "caseId": "001-agent-harness-systematization",
+  "description": "Minimum useful mental model expected from the frozen agent-harness research corpus.",
+  "requiredNodes": [
+    {"id": "domain.agent-harness", "kind": "domain", "title": "Agent Harness"},
+    {"id": "capability.control-loop", "kind": "capability", "title": "Control Loop"},
+    {"id": "capability.context-memory", "kind": "capability", "title": "Context and Memory"},
+    {"id": "capability.tool-execution", "kind": "capability", "title": "Tool Execution"},
+    {"id": "capability.safety-governance", "kind": "capability", "title": "Safety and Governance"},
+    {"id": "capability.verification-observability", "kind": "capability", "title": "Verification and Observability"},
+    {"id": "capability.reusable-workflows", "kind": "capability", "title": "Reusable Skills and Workflows"},
+    {"id": "concept.retry-budget", "kind": "concept", "title": "Retry and Iteration Budget"},
+    {"id": "pattern.human-approval-gate", "kind": "pattern", "title": "Human Approval Gate"},
+    {"id": "concept.sandboxing", "kind": "concept", "title": "Sandboxing"},
+    {"id": "concept.production-traces", "kind": "concept", "title": "Production Traces"},
+    {"id": "concept.skill-contract", "kind": "concept", "title": "Skill Contract"},
+    {"id": "concept.harness-vs-orchestrator", "kind": "concept", "title": "Harness vs Orchestrator"}
+  ],
+  "requiredRelations": [
+    {"source": "domain.agent-harness", "kind": "contains", "target": "capability.control-loop"},
+    {"source": "domain.agent-harness", "kind": "contains", "target": "capability.context-memory"},
+    {"source": "domain.agent-harness", "kind": "contains", "target": "capability.tool-execution"},
+    {"source": "domain.agent-harness", "kind": "contains", "target": "capability.safety-governance"},
+    {"source": "domain.agent-harness", "kind": "contains", "target": "capability.verification-observability"},
+    {"source": "domain.agent-harness", "kind": "contains", "target": "capability.reusable-workflows"},
+    {"source": "domain.agent-harness", "kind": "contains", "target": "concept.harness-vs-orchestrator"},
+    {"source": "capability.control-loop", "kind": "contains", "target": "concept.retry-budget"},
+    {"source": "capability.safety-governance", "kind": "contains", "target": "pattern.human-approval-gate"},
+    {"source": "capability.safety-governance", "kind": "contains", "target": "concept.sandboxing"},
+    {"source": "capability.verification-observability", "kind": "contains", "target": "concept.production-traces"},
+    {"source": "capability.reusable-workflows", "kind": "contains", "target": "concept.skill-contract"},
+    {"source": "capability.control-loop", "kind": "requires", "target": "capability.verification-observability"},
+    {"source": "capability.tool-execution", "kind": "requires", "target": "capability.safety-governance"},
+    {"source": "concept.production-traces", "kind": "supports", "target": "capability.verification-observability"},
+    {"source": "concept.harness-vs-orchestrator", "kind": "relates_to", "target": "capability.reusable-workflows"}
+  ],
+  "originExpectations": [
+    {"type": "node", "id": "domain.agent-harness", "origin": "inferred"},
+    {"type": "node", "id": "concept.retry-budget", "origin": "extracted"},
+    {"type": "node", "id": "pattern.human-approval-gate", "origin": "extracted"},
+    {"type": "node", "id": "concept.production-traces", "origin": "extracted"},
+    {"type": "node", "id": "concept.harness-vs-orchestrator", "origin": "extracted"},
+    {"type": "edge", "source": "capability.control-loop", "kind": "requires", "target": "capability.verification-observability", "origin": "inferred"},
+    {"type": "edge", "source": "capability.tool-execution", "kind": "requires", "target": "capability.safety-governance", "origin": "inferred"},
+    {"type": "edge", "source": "concept.production-traces", "kind": "supports", "target": "capability.verification-observability", "origin": "inferred"}
+  ],
+  "thresholds": {
+    "contractValid": true,
+    "requiredNodeRecallMin": 0.85,
+    "requiredRelationRecallMin": 0.75,
+    "provenanceCoverageMin": 0.90,
+    "originAccuracyMin": 0.85,
+    "duplicateRateMax": 0.10,
+    "humanCorrectionRateMax": 0.30,
+    "acceptedWithoutRewriteMin": 0.70
+  }
+}

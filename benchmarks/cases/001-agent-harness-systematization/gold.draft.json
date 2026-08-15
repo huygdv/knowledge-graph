@@ -1,0 +1,151 @@
+{
+  "contractVersion": "0.1",
+  "run": {
+    "id": "gold-001-agent-harness",
+    "startedAt": "2026-08-15T20:00:00+07:00",
+    "producer": "human-curated-gold",
+    "inputAdapter": "markdown",
+    "benchmarkCase": "001-agent-harness-systematization"
+  },
+  "sources": [
+    {"id": "source.fragment-1", "type": "markdown", "title": "From prompt quality to harness quality", "locator": "input.md#fragment-1"},
+    {"id": "source.fragment-2", "type": "markdown", "title": "The loop controls reliability", "locator": "input.md#fragment-2"},
+    {"id": "source.fragment-3", "type": "markdown", "title": "Tools, environment, and safety are separate concerns", "locator": "input.md#fragment-3"},
+    {"id": "source.fragment-4", "type": "markdown", "title": "Verification and observability", "locator": "input.md#fragment-4"},
+    {"id": "source.fragment-5", "type": "markdown", "title": "Skills, workflows, and reusable engineering knowledge", "locator": "input.md#fragment-5"},
+    {"id": "source.fragment-6", "type": "markdown", "title": "Evaluation should judge the system", "locator": "input.md#fragment-6"},
+    {"id": "source.fragment-7", "type": "markdown", "title": "Product boundary question", "locator": "input.md#fragment-7"}
+  ],
+  "proposals": {
+    "nodes": [
+      {
+        "proposalId": "p.node.agent-harness",
+        "operation": "add_node",
+        "origin": "inferred",
+        "confidence": 0.98,
+        "node": {"id": "domain.agent-harness", "kind": "domain", "title": "Agent Harness", "summary": "The system layer around an AI model that controls context, tools, execution, policy, loops, and verification.", "tags": ["agent", "harness"]},
+        "evidence": [{"sourceId": "source.fragment-1", "locator": "input.md#fragment-1"}, {"sourceId": "source.fragment-7", "locator": "input.md#fragment-7"}]
+      },
+      {
+        "proposalId": "p.node.control-loop",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.98,
+        "node": {"id": "capability.control-loop", "kind": "capability", "title": "Control Loop", "summary": "Explicit execution stages and state transitions that govern progress, retries, stopping, and completion.", "tags": ["loop", "orchestration"]},
+        "evidence": [{"sourceId": "source.fragment-2", "locator": "input.md#fragment-2"}]
+      },
+      {
+        "proposalId": "p.node.context-memory",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.91,
+        "node": {"id": "capability.context-memory", "kind": "capability", "title": "Context and Memory", "summary": "Controls what information the agent sees and retains while executing a task.", "tags": ["context", "memory"]},
+        "evidence": [{"sourceId": "source.fragment-1", "locator": "input.md#fragment-1"}, {"sourceId": "source.fragment-4", "locator": "input.md#fragment-4"}]
+      },
+      {
+        "proposalId": "p.node.tool-execution",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.96,
+        "node": {"id": "capability.tool-execution", "kind": "capability", "title": "Tool Execution", "summary": "Tool contracts and execution boundaries that let agents act on repositories and external systems in a controlled way.", "tags": ["tools", "execution"]},
+        "evidence": [{"sourceId": "source.fragment-1", "locator": "input.md#fragment-1"}, {"sourceId": "source.fragment-3", "locator": "input.md#fragment-3"}]
+      },
+      {
+        "proposalId": "p.node.safety-governance",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.97,
+        "node": {"id": "capability.safety-governance", "kind": "capability", "title": "Safety and Governance", "summary": "Policy and infrastructure controls that limit dangerous actions, permissions, credentials exposure, and untrusted instructions.", "tags": ["safety", "governance"]},
+        "evidence": [{"sourceId": "source.fragment-3", "locator": "input.md#fragment-3"}]
+      },
+      {
+        "proposalId": "p.node.verification-observability",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.97,
+        "node": {"id": "capability.verification-observability", "kind": "capability", "title": "Verification and Observability", "summary": "Evidence, tests, traces, and telemetry used to determine whether agent work is correct and why failures occurred.", "tags": ["verification", "observability", "evaluation"]},
+        "evidence": [{"sourceId": "source.fragment-4", "locator": "input.md#fragment-4"}, {"sourceId": "source.fragment-6", "locator": "input.md#fragment-6"}]
+      },
+      {
+        "proposalId": "p.node.reusable-workflows",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.95,
+        "node": {"id": "capability.reusable-workflows", "kind": "capability", "title": "Reusable Skills and Workflows", "summary": "Packaged engineering knowledge that gives humans and agents repeatable triggers, artifacts, guardrails, feedback, and handoffs.", "tags": ["skills", "workflow"]},
+        "evidence": [{"sourceId": "source.fragment-5", "locator": "input.md#fragment-5"}, {"sourceId": "source.fragment-7", "locator": "input.md#fragment-7"}]
+      },
+      {
+        "proposalId": "p.node.retry-budget",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.98,
+        "node": {"id": "concept.retry-budget", "kind": "concept", "title": "Retry and Iteration Budget", "summary": "Explicit limits that prevent long-running loops from retrying or iterating indefinitely.", "tags": ["retry", "budget"]},
+        "evidence": [{"sourceId": "source.fragment-2", "locator": "input.md#fragment-2"}]
+      },
+      {
+        "proposalId": "p.node.human-approval-gate",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.99,
+        "node": {"id": "pattern.human-approval-gate", "kind": "pattern", "title": "Human Approval Gate", "summary": "Require explicit approval before high-impact or irreversible agent actions.", "tags": ["approval", "human-in-loop"]},
+        "evidence": [{"sourceId": "source.fragment-3", "locator": "input.md#fragment-3"}]
+      },
+      {
+        "proposalId": "p.node.sandboxing",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.99,
+        "node": {"id": "concept.sandboxing", "kind": "concept", "title": "Sandboxing", "summary": "Isolate untrusted execution so agent actions cannot freely affect protected systems or data.", "tags": ["sandbox", "security"]},
+        "evidence": [{"sourceId": "source.fragment-3", "locator": "input.md#fragment-3"}]
+      },
+      {
+        "proposalId": "p.node.production-traces",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.97,
+        "node": {"id": "concept.production-traces", "kind": "concept", "title": "Production Traces", "summary": "Real execution traces used to diagnose recurring failure patterns and evaluate agent behavior.", "tags": ["traces", "evaluation"]},
+        "evidence": [{"sourceId": "source.fragment-6", "locator": "input.md#fragment-6"}]
+      },
+      {
+        "proposalId": "p.node.skill-contract",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.96,
+        "node": {"id": "concept.skill-contract", "kind": "concept", "title": "Skill Contract", "summary": "A reusable capability definition shaped around trigger, inputs, artifacts, guardrails, feedback loop, and handoff.", "tags": ["skills", "contract"]},
+        "evidence": [{"sourceId": "source.fragment-5", "locator": "input.md#fragment-5"}]
+      },
+      {
+        "proposalId": "p.node.harness-vs-orchestrator",
+        "operation": "add_node",
+        "origin": "extracted",
+        "confidence": 0.97,
+        "node": {"id": "concept.harness-vs-orchestrator", "kind": "concept", "title": "Harness vs Orchestrator", "summary": "The harness provides reusable agent-runtime primitives while higher-level orchestration coordinates workflows, specialists, schedules, and product-specific surfaces.", "tags": ["architecture", "orchestration"]},
+        "evidence": [{"sourceId": "source.fragment-7", "locator": "input.md#fragment-7"}]
+      }
+    ],
+    "edges": [
+      {"proposalId": "p.edge.domain-loop", "operation": "add_edge", "origin": "inferred", "confidence": 0.97, "edge": {"id": "edge.agent-harness.contains.control-loop", "kind": "contains", "source": "domain.agent-harness", "target": "capability.control-loop"}, "evidence": [{"sourceId": "source.fragment-2", "locator": "input.md#fragment-2"}]},
+      {"proposalId": "p.edge.domain-context", "operation": "add_edge", "origin": "inferred", "confidence": 0.92, "edge": {"id": "edge.agent-harness.contains.context-memory", "kind": "contains", "source": "domain.agent-harness", "target": "capability.context-memory"}, "evidence": [{"sourceId": "source.fragment-1", "locator": "input.md#fragment-1"}]},
+      {"proposalId": "p.edge.domain-tools", "operation": "add_edge", "origin": "inferred", "confidence": 0.96, "edge": {"id": "edge.agent-harness.contains.tool-execution", "kind": "contains", "source": "domain.agent-harness", "target": "capability.tool-execution"}, "evidence": [{"sourceId": "source.fragment-1", "locator": "input.md#fragment-1"}]},
+      {"proposalId": "p.edge.domain-safety", "operation": "add_edge", "origin": "inferred", "confidence": 0.96, "edge": {"id": "edge.agent-harness.contains.safety-governance", "kind": "contains", "source": "domain.agent-harness", "target": "capability.safety-governance"}, "evidence": [{"sourceId": "source.fragment-3", "locator": "input.md#fragment-3"}]},
+      {"proposalId": "p.edge.domain-verification", "operation": "add_edge", "origin": "inferred", "confidence": 0.96, "edge": {"id": "edge.agent-harness.contains.verification-observability", "kind": "contains", "source": "domain.agent-harness", "target": "capability.verification-observability"}, "evidence": [{"sourceId": "source.fragment-4", "locator": "input.md#fragment-4"}]},
+      {"proposalId": "p.edge.domain-workflows", "operation": "add_edge", "origin": "inferred", "confidence": 0.94, "edge": {"id": "edge.agent-harness.contains.reusable-workflows", "kind": "contains", "source": "domain.agent-harness", "target": "capability.reusable-workflows"}, "evidence": [{"sourceId": "source.fragment-5", "locator": "input.md#fragment-5"}]},
+      {"proposalId": "p.edge.domain-boundary", "operation": "add_edge", "origin": "inferred", "confidence": 0.91, "edge": {"id": "edge.agent-harness.contains.harness-vs-orchestrator", "kind": "contains", "source": "domain.agent-harness", "target": "concept.harness-vs-orchestrator"}, "evidence": [{"sourceId": "source.fragment-7", "locator": "input.md#fragment-7"}]},
+      {"proposalId": "p.edge.loop-retry", "operation": "add_edge", "origin": "extracted", "confidence": 0.98, "edge": {"id": "edge.control-loop.contains.retry-budget", "kind": "contains", "source": "capability.control-loop", "target": "concept.retry-budget"}, "evidence": [{"sourceId": "source.fragment-2", "locator": "input.md#fragment-2"}]},
+      {"proposalId": "p.edge.safety-approval", "operation": "add_edge", "origin": "extracted", "confidence": 0.99, "edge": {"id": "edge.safety-governance.contains.human-approval-gate", "kind": "contains", "source": "capability.safety-governance", "target": "pattern.human-approval-gate"}, "evidence": [{"sourceId": "source.fragment-3", "locator": "input.md#fragment-3"}]},
+      {"proposalId": "p.edge.safety-sandbox", "operation": "add_edge", "origin": "extracted", "confidence": 0.99, "edge": {"id": "edge.safety-governance.contains.sandboxing", "kind": "contains", "source": "capability.safety-governance", "target": "concept.sandboxing"}, "evidence": [{"sourceId": "source.fragment-3", "locator": "input.md#fragment-3"}]},
+      {"proposalId": "p.edge.verification-traces", "operation": "add_edge", "origin": "inferred", "confidence": 0.90, "edge": {"id": "edge.verification-observability.contains.production-traces", "kind": "contains", "source": "capability.verification-observability", "target": "concept.production-traces"}, "evidence": [{"sourceId": "source.fragment-6", "locator": "input.md#fragment-6"}]},
+      {"proposalId": "p.edge.workflows-skill", "operation": "add_edge", "origin": "extracted", "confidence": 0.95, "edge": {"id": "edge.reusable-workflows.contains.skill-contract", "kind": "contains", "source": "capability.reusable-workflows", "target": "concept.skill-contract"}, "evidence": [{"sourceId": "source.fragment-5", "locator": "input.md#fragment-5"}]},
+      {"proposalId": "p.edge.loop-requires-verification", "operation": "add_edge", "origin": "inferred", "confidence": 0.90, "edge": {"id": "edge.control-loop.requires.verification-observability", "kind": "requires", "source": "capability.control-loop", "target": "capability.verification-observability"}, "evidence": [{"sourceId": "source.fragment-2", "locator": "input.md#fragment-2"}, {"sourceId": "source.fragment-4", "locator": "input.md#fragment-4"}]},
+      {"proposalId": "p.edge.tools-requires-safety", "operation": "add_edge", "origin": "inferred", "confidence": 0.93, "edge": {"id": "edge.tool-execution.requires.safety-governance", "kind": "requires", "source": "capability.tool-execution", "target": "capability.safety-governance"}, "evidence": [{"sourceId": "source.fragment-3", "locator": "input.md#fragment-3"}]},
+      {"proposalId": "p.edge.traces-support-verification", "operation": "add_edge", "origin": "inferred", "confidence": 0.91, "edge": {"id": "edge.production-traces.supports.verification-observability", "kind": "supports", "source": "concept.production-traces", "target": "capability.verification-observability"}, "evidence": [{"sourceId": "source.fragment-6", "locator": "input.md#fragment-6"}]},
+      {"proposalId": "p.edge.boundary-relates-workflows", "operation": "add_edge", "origin": "inferred", "confidence": 0.86, "edge": {"id": "edge.harness-vs-orchestrator.relates.reusable-workflows", "kind": "relates_to", "source": "concept.harness-vs-orchestrator", "target": "capability.reusable-workflows"}, "evidence": [{"sourceId": "source.fragment-7", "locator": "input.md#fragment-7"}, {"sourceId": "source.fragment-5", "locator": "input.md#fragment-5"}]}
+    ],
+    "merges": [],
+    "conflicts": []
+  },
+  "review": {
+    "status": "pending",
+    "decisions": []
+  }
+}
