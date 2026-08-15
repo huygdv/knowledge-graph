@@ -6,6 +6,18 @@ A portable knowledge-canvas engine for turning research, experience, curricula, 
 - **System design:** https://huygdv.github.io/knowledge-graph/system-design-overview/
 - **Project changelog:** https://huygdv.github.io/knowledge-graph/changelog/
 
+## Strategic direction
+
+The long-term product thesis is broader than graph visualization:
+
+> **Turn fragmented information into structured, trustworthy, reusable understanding.**
+
+The canvas is a projection of a living knowledge model, not the product boundary. The near-term wedge is to systematize fragmented AI conversations and research into a reviewable Knowledge Pack, while preserving provenance and human control.
+
+The current repository is intended to remain the public representation/exploration foundation; proprietary product intelligence may live above it behind explicit Knowledge Pack and adapter contracts.
+
+See [`ADR-003: Product thesis, open foundation, and systematization architecture`](docs/ADR-003-product-thesis-open-core-and-systematization-architecture.md) for the strategic boundary, non-goals, metrics, and the falsifiable v0.4 experiment.
+
 ## Product model
 
 The application is now separated from the data it renders:
@@ -148,6 +160,7 @@ GitHub Pages deploys only after these gates pass.
 - [`docs/KNOWLEDGE_PACK_SCHEMA.md`](docs/KNOWLEDGE_PACK_SCHEMA.md)
 - [`docs/ADR-001-zero-build-mvp.md`](docs/ADR-001-zero-build-mvp.md)
 - [`docs/ADR-002-canonical-graph-and-projections.md`](docs/ADR-002-canonical-graph-and-projections.md)
+- [`docs/ADR-003-product-thesis-open-core-and-systematization-architecture.md`](docs/ADR-003-product-thesis-open-core-and-systematization-architecture.md)
 - [`docs/SCHEMA.md`](docs/SCHEMA.md)
 - [`docs/PRODUCT_REVIEW.md`](docs/PRODUCT_REVIEW.md)
 - [`CHANGELOG.md`](CHANGELOG.md)
