@@ -4,6 +4,30 @@ The public, data-driven timeline is available at:
 
 - https://huygdv.github.io/knowledge-graph/changelog/
 
+## Strategic ADR-003 — 2026-08-15
+
+### Product thesis
+
+- Reframed the strategic product from a graph viewer into a **systematization engine**: turn fragmented information into structured, trustworthy, reusable understanding.
+- Defined the near-term wedge as fragmented AI conversations and research → reviewable Knowledge Pack.
+- Defined `Knowledge Pack` as the portable boundary between knowledge creation and knowledge consumption.
+- Established provenance-first trust, explicit human review, and local-first ownership as product principles.
+
+### Open / private boundary
+
+- Keep the current repository as the intended public representation and exploration foundation.
+- Keep strategic systematization intelligence, large-history resolution, continuous updating, collaboration, and organization features eligible for a separate proprietary product layer.
+- Formal open-source licensing remains a separate decision; public source availability is not treated as a completed licensing decision.
+
+### v0.4 decision gate
+
+- v0.4 is a **Systematization Prototype**, not another canvas feature release.
+- Initial experiment: pasted Markdown / exported AI conversation → draft Knowledge Pack → validation → reviewable diff → accepted canvas.
+- Introduced **Time to Structured Understanding (TTSU)** as the working north-star metric.
+- Added explicit stop/falsification criteria so low-quality generated structure triggers product review instead of more visualization features.
+
+See [`docs/ADR-003-product-thesis-open-core-and-systematization-architecture.md`](docs/ADR-003-product-thesis-open-core-and-systematization-architecture.md).
+
 ## v0.3.0 — 2026-08-11
 
 ### Added
