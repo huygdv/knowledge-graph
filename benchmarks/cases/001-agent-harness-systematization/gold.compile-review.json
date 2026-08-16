@@ -1,0 +1,43 @@
+{
+  "reviewVersion": "0.1",
+  "fixture": true,
+  "purpose": "Deterministic compiler self-test only. Do not count as measured human review performance.",
+  "status": "completed",
+  "decisions": [
+    {"proposalId": "p.node.agent-harness", "decision": "accept"},
+    {"proposalId": "p.node.control-loop", "decision": "accept"},
+    {"proposalId": "p.node.context-memory", "decision": "accept"},
+    {"proposalId": "p.node.tool-execution", "decision": "accept"},
+    {"proposalId": "p.node.safety-governance", "decision": "accept"},
+    {"proposalId": "p.node.verification-observability", "decision": "accept"},
+    {"proposalId": "p.node.reusable-workflows", "decision": "accept"},
+    {"proposalId": "p.node.retry-budget", "decision": "accept"},
+    {"proposalId": "p.node.human-approval-gate", "decision": "accept"},
+    {"proposalId": "p.node.sandboxing", "decision": "accept"},
+    {"proposalId": "p.node.production-traces", "decision": "accept"},
+    {"proposalId": "p.node.skill-contract", "decision": "accept"},
+    {"proposalId": "p.node.harness-vs-orchestrator", "decision": "accept"},
+    {"proposalId": "p.edge.domain-loop", "decision": "accept"},
+    {"proposalId": "p.edge.domain-context", "decision": "accept"},
+    {"proposalId": "p.edge.domain-tools", "decision": "accept"},
+    {"proposalId": "p.edge.domain-safety", "decision": "accept"},
+    {"proposalId": "p.edge.domain-verification", "decision": "accept"},
+    {"proposalId": "p.edge.domain-workflows", "decision": "accept"},
+    {"proposalId": "p.edge.domain-boundary", "decision": "accept"},
+    {"proposalId": "p.edge.loop-retry", "decision": "accept"},
+    {"proposalId": "p.edge.safety-approval", "decision": "accept"},
+    {"proposalId": "p.edge.safety-sandbox", "decision": "accept"},
+    {"proposalId": "p.edge.verification-traces", "decision": "accept"},
+    {"proposalId": "p.edge.workflows-skill", "decision": "accept"},
+    {"proposalId": "p.edge.loop-requires-verification", "decision": "accept"},
+    {"proposalId": "p.edge.tools-requires-safety", "decision": "accept"},
+    {"proposalId": "p.edge.traces-support-verification", "decision": "accept"},
+    {"proposalId": "p.edge.boundary-relates-workflows", "decision": "accept"}
+  ],
+  "verdict": {
+    "mentalModelUseful": true,
+    "provenanceTrustworthy": true,
+    "continueFromModel": true,
+    "fixtureOnly": true
+  }
+}
