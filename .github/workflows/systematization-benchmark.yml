@@ -12,7 +12,10 @@ on:
       - 'scripts/normalize_systematization_source.py'
       - 'scripts/compile_systematization.py'
       - 'scripts/verify_p1_pipeline.py'
+      - 'scripts/run_systematizer.py'
+      - 'scripts/systematizer_fixture_adapter.py'
       - 'scripts/test_systematization_core.py'
+      - 'scripts/test_systematizer_interface.py'
       - 'scripts/smoke-systematization-compiled.html'
       - '.github/workflows/systematization-benchmark.yml'
   pull_request:
@@ -26,7 +29,10 @@ on:
       - 'scripts/normalize_systematization_source.py'
       - 'scripts/compile_systematization.py'
       - 'scripts/verify_p1_pipeline.py'
+      - 'scripts/run_systematizer.py'
+      - 'scripts/systematizer_fixture_adapter.py'
       - 'scripts/test_systematization_core.py'
+      - 'scripts/test_systematizer_interface.py'
       - 'scripts/smoke-systematization-compiled.html'
       - '.github/workflows/systematization-benchmark.yml'
   workflow_dispatch:
@@ -59,10 +65,16 @@ jobs:
           python -m py_compile scripts/normalize_systematization_source.py
           python -m py_compile scripts/compile_systematization.py
           python -m py_compile scripts/verify_p1_pipeline.py
+          python -m py_compile scripts/run_systematizer.py
+          python -m py_compile scripts/systematizer_fixture_adapter.py
           python -m py_compile scripts/test_systematization_core.py
+          python -m py_compile scripts/test_systematizer_interface.py
 
       - name: Test deterministic core
         run: python scripts/test_systematization_core.py -v
+
+      - name: Test Systematizer interface
+        run: python scripts/test_systematizer_interface.py -v
 
       - name: Evaluate gold fixture
         run: |
@@ -83,6 +95,36 @@ jobs:
           python -m json.tool /tmp/p1-normalized-source.json > /dev/null
           python -m json.tool site/tmp-systematized.kg.json > /dev/null
           python -m json.tool /tmp/p1-provenance.json > /dev/null
+
+      - name: Verify P2 Systematizer process contract
+        run: |
+          python scripts/run_systematizer.py \
+            --normalized-source /tmp/p1-normalized-source.json \
+            --adapter-command "python scripts/systematizer_fixture_adapter.py --draft benchmarks/cases/001-agent-harness-systematization/gold.draft.json" \
+            --systematizer-id fixture-gold-interface \
+            --benchmark-case 001-agent-harness-systematization \
+            --draft-output /tmp/p2-fixture.draft.json \
+            --report-output /tmp/p2-fixture.report.json
+
+          python -m json.tool /tmp/p2-fixture.draft.json > /dev/null
+          python -m json.tool /tmp/p2-fixture.report.json > /dev/null
+
+          python - <<'PY'
+          import json
+          report = json.load(open('/tmp/p2-fixture.report.json'))
+          assert report['draftValid'] is True
+          assert report['systematizerId'] == 'fixture-gold-interface'
+          assert report['durationMs'] >= 0
+          assert report['configurationHash'].startswith('sha256:')
+          PY
+
+          python scripts/evaluate_systematization.py \
+            --case benchmarks/cases/001-agent-harness-systematization \
+            --draft /tmp/p2-fixture.draft.json \
+            --output /tmp/p2-fixture-eval.json \
+            --strict
+
+          echo 'Fixture-only interface verification passed. This is NOT model performance.'
 
       - name: Browser smoke compiled Knowledge Pack
         shell: bash
@@ -158,6 +200,7 @@ jobs:
           test -f docs/V0.4_SYSTEMATIZATION_EXPERIMENT.md
           test -f docs/SYSTEMATIZATION_DRAFT_CONTRACT.md
           test -f docs/SYSTEMATIZATION_EVALUATION.md
+          test -f docs/SYSTEMATIZER_INTERFACE.md
           test -f docs/V0.4_IMPLEMENTATION_BACKLOG.md
           test -f benchmarks/README.md
           test -f benchmarks/cases/001-agent-harness-systematization/input.md
@@ -166,3 +209,6 @@ jobs:
           test -f scripts/systematization/source_adapters.py
           test -f scripts/systematization/contract.py
           test -f scripts/systematization/pack.py
+          test -f scripts/systematization/systematizer.py
+          test -f scripts/run_systematizer.py
+          test -f scripts/systematizer_fixture_adapter.py
