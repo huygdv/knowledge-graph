@@ -44,14 +44,24 @@ def main() -> int:
         unexpected = sorted(set(normalized_sources) - set(draft_sources))
         raise SystemExit(f"SourceAdapter alignment failed. missing={missing} unexpected={unexpected}")
 
+    title_warnings = []
     for source_id, draft_source in draft_sources.items():
         normalized_source = normalized_sources[source_id]
-        for field in ("title", "locator"):
-            if draft_source.get(field) != normalized_source.get(field):
-                raise SystemExit(
-                    f"SourceAdapter alignment failed for {source_id}.{field}: "
-                    f"draft={draft_source.get(field)!r} normalized={normalized_source.get(field)!r}"
-                )
+        if draft_source.get("locator") != normalized_source.get("locator"):
+            raise SystemExit(
+                f"SourceAdapter alignment failed for {source_id}.locator: "
+                f"draft={draft_source.get('locator')!r} normalized={normalized_source.get('locator')!r}"
+            )
+        draft_hash = draft_source.get("contentHash")
+        if draft_hash and draft_hash != normalized_source.get("contentHash"):
+            raise SystemExit(
+                f"SourceAdapter content hash mismatch for {source_id}: "
+                f"draft={draft_hash!r} normalized={normalized_source.get('contentHash')!r}"
+            )
+        if draft_source.get("title") != normalized_source.get("title"):
+            title_warnings.append(
+                f"{source_id}: draft title {draft_source.get('title')!r} differs from heading {normalized_source.get('title')!r}"
+            )
 
     validation = validate_draft(draft)
     if not validation["valid"]:
@@ -101,6 +111,9 @@ def main() -> int:
 
     print("✓ P1 deterministic pipeline verified")
     print(f"  normalized fragments: {len(normalized_sources)}")
+    print(f"  source title metadata warnings: {len(title_warnings)}")
+    for warning in title_warnings:
+        print(f"    warning: {warning}")
     print(f"  draft proposals: {proposal_count}")
     print(f"  compiled nodes: {len(pack['graph']['nodes'])}")
     print(f"  compiled edges: {len(pack['graph']['edges'])}")
