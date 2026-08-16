@@ -7,7 +7,13 @@ on:
       - 'benchmarks/**'
       - 'docs/SYSTEMATIZATION_*.md'
       - 'docs/V0.4_*.md'
+      - 'scripts/systematization/**'
       - 'scripts/evaluate_systematization.py'
+      - 'scripts/normalize_systematization_source.py'
+      - 'scripts/compile_systematization.py'
+      - 'scripts/verify_p1_pipeline.py'
+      - 'scripts/test_systematization_core.py'
+      - 'scripts/smoke-systematization-compiled.html'
       - '.github/workflows/systematization-benchmark.yml'
   pull_request:
     branches: [main]
@@ -15,7 +21,13 @@ on:
       - 'benchmarks/**'
       - 'docs/SYSTEMATIZATION_*.md'
       - 'docs/V0.4_*.md'
+      - 'scripts/systematization/**'
       - 'scripts/evaluate_systematization.py'
+      - 'scripts/normalize_systematization_source.py'
+      - 'scripts/compile_systematization.py'
+      - 'scripts/verify_p1_pipeline.py'
+      - 'scripts/test_systematization_core.py'
+      - 'scripts/smoke-systematization-compiled.html'
       - '.github/workflows/systematization-benchmark.yml'
   workflow_dispatch:
 
@@ -38,9 +50,19 @@ jobs:
         run: |
           python -m json.tool benchmarks/cases/001-agent-harness-systematization/expected-structure.json > /dev/null
           python -m json.tool benchmarks/cases/001-agent-harness-systematization/gold.draft.json > /dev/null
+          python -m json.tool benchmarks/cases/001-agent-harness-systematization/gold.compile-review.json > /dev/null
 
-      - name: Validate evaluator syntax
-        run: python -m py_compile scripts/evaluate_systematization.py
+      - name: Validate Python syntax
+        run: |
+          python -m compileall -q scripts/systematization
+          python -m py_compile scripts/evaluate_systematization.py
+          python -m py_compile scripts/normalize_systematization_source.py
+          python -m py_compile scripts/compile_systematization.py
+          python -m py_compile scripts/verify_p1_pipeline.py
+          python -m py_compile scripts/test_systematization_core.py
+
+      - name: Test deterministic core
+        run: python scripts/test_systematization_core.py -v
 
       - name: Evaluate gold fixture
         run: |
@@ -51,6 +73,86 @@ jobs:
             --strict
           cat /tmp/benchmark-001-report.json
 
+      - name: Verify P1 deterministic pipeline
+        run: |
+          python scripts/verify_p1_pipeline.py \
+            --case benchmarks/cases/001-agent-harness-systematization \
+            --normalized-output /tmp/p1-normalized-source.json \
+            --pack-output site/tmp-systematized.kg.json \
+            --provenance-output /tmp/p1-provenance.json
+          python -m json.tool /tmp/p1-normalized-source.json > /dev/null
+          python -m json.tool site/tmp-systematized.kg.json > /dev/null
+          python -m json.tool /tmp/p1-provenance.json > /dev/null
+
+      - name: Browser smoke compiled Knowledge Pack
+        shell: bash
+        run: |
+          set -euo pipefail
+          BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$BROWSER" || { echo 'No Chromium-compatible browser available'; exit 1; }
+
+          python -m http.server 8081 --bind 127.0.0.1 > /tmp/p1-http.log 2>&1 &
+          SERVER_PID=$!
+          "$BROWSER" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --disable-background-networking \
+            --disable-default-apps \
+            --disable-extensions \
+            --disable-sync \
+            --no-first-run \
+            --remote-debugging-address=127.0.0.1 \
+            --remote-debugging-port=9225 \
+            --user-data-dir=/tmp/kg-chrome-systematization-p1 \
+            --window-size=1280,900 \
+            http://127.0.0.1:8081/scripts/smoke-systematization-compiled.html \
+            > /tmp/p1-browser.log 2>&1 &
+          CHROME_PID=$!
+          trap 'kill $CHROME_PID $SERVER_PID 2>/dev/null || true' EXIT
+
+          for i in {1..150}; do
+            curl -fsS http://127.0.0.1:9225/json/list > /tmp/p1-pages.json 2>/dev/null && break
+            sleep .1
+          done
+
+          for i in {1..500}; do
+            curl -fsS http://127.0.0.1:9225/json/list > /tmp/p1-pages.json 2>/dev/null || true
+            TITLE="$(python - <<'PY'
+          import json
+          try:
+              pages = json.load(open('/tmp/p1-pages.json'))
+              page = next((p for p in pages if 'smoke-systematization-compiled.html' in p.get('url', '')), {})
+              print(page.get('title', ''))
+          except Exception:
+              print('')
+          PY
+          )"
+            case "$TITLE" in
+              "PASS: Systematization Compiled Pack")
+                echo 'Systematization compiled-pack browser smoke: PASS'
+                kill "$CHROME_PID" "$SERVER_PID" 2>/dev/null || true
+                wait "$CHROME_PID" 2>/dev/null || true
+                wait "$SERVER_PID" 2>/dev/null || true
+                trap - EXIT
+                exit 0
+                ;;
+              FAIL:*)
+                echo "Systematization compiled-pack browser smoke: $TITLE"
+                cat /tmp/p1-browser.log || true
+                cat /tmp/p1-http.log || true
+                exit 1
+                ;;
+            esac
+            sleep .1
+          done
+
+          echo 'Systematization compiled-pack browser smoke timed out.'
+          cat /tmp/p1-pages.json || true
+          tail -120 /tmp/p1-browser.log || true
+          exit 1
+
       - name: Verify strategy artifacts
         run: |
           test -f docs/V0.4_SYSTEMATIZATION_EXPERIMENT.md
@@ -60,3 +162,7 @@ jobs:
           test -f benchmarks/README.md
           test -f benchmarks/cases/001-agent-harness-systematization/input.md
           test -f benchmarks/cases/001-agent-harness-systematization/notes.md
+          test -f benchmarks/cases/001-agent-harness-systematization/gold.compile-review.json
+          test -f scripts/systematization/source_adapters.py
+          test -f scripts/systematization/contract.py
+          test -f scripts/systematization/pack.py

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RUNNING: Systematization compiled pack smoke</title>
+  <style>html,body{margin:0;height:100%;font:14px system-ui,sans-serif}iframe{width:100%;height:100%;border:0}#status{position:fixed;z-index:9999;left:8px;top:8px;padding:6px 9px;background:#fff;border:1px solid #ccc}</style>
+</head>
+<body>
+  <div id="status">running</div>
+  <iframe id="app" src="../site/index.html?systematization-smoke=1"></iframe>
+  <script>
+    const frame = document.querySelector('#app');
+    const status = document.querySelector('#status');
+    const PACK_ID = 'benchmark-agent-harness-p1';
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    function fail(message) {
+      document.title = `FAIL: ${message}`;
+      status.textContent = document.title;
+      throw new Error(message);
+    }
+    async function waitFor(check, label, timeout = 8000) {
+      const started = performance.now();
+      while (performance.now() - started < timeout) {
+        try { const value = check(); if (value) return value; } catch {}
+        await sleep(40);
+      }
+      fail(`timeout waiting for ${label}`);
+    }
+    async function navigate(src, marker) {
+      frame.src = src;
+      await waitFor(() => frame.contentWindow?.location?.search.includes(marker), `navigation ${marker}`);
+      await waitFor(() => frame.contentWindow?.KGWorkspace, `runtime ${marker}`);
+    }
+
+    async function run() {
+      await waitFor(() => frame.contentWindow?.KGWorkspace, 'initial runtime');
+      const runtime = frame.contentWindow.KGWorkspace;
+      await runtime.deleteWorkspace(PACK_ID).catch(() => {});
+
+      const response = await fetch('../site/tmp-systematized.kg.json', { cache: 'no-store' });
+      if (!response.ok) fail(`compiled pack fixture unavailable: ${response.status}`);
+      const pack = await response.json();
+      const validation = runtime.validatePack(pack);
+      if (!validation.valid) fail(`browser pack validation failed: ${validation.errors.join(' | ')}`);
+
+      await runtime.activateImportedPack(pack);
+      await navigate('../site/index.html?systematization-smoke=2', 'systematization-smoke=2');
+      const doc = frame.contentDocument;
+      await waitFor(() => doc.querySelector('#nodes-layer .knowledge-node[data-id="concept.retry-budget"]'), 'compiled retry-budget node');
+      await waitFor(() => doc.querySelector('#nodes-layer .knowledge-node[data-id="pattern.human-approval-gate"]'), 'compiled approval-gate node');
+      const switcher = await waitFor(() => doc.querySelector('.workspace-switcher strong'), 'workspace switcher');
+      if (!/Agent Harness/.test(switcher.textContent)) fail(`workspace title mismatch: ${switcher.textContent}`);
+
+      const activeRuntime = frame.contentWindow.KGWorkspace;
+      const exported = await activeRuntime.exportActivePack();
+      if (exported.graph.nodes.length !== 13 || exported.graph.edges.length !== 16) {
+        fail(`compiled pack changed after browser import/export: nodes=${exported.graph.nodes.length} edges=${exported.graph.edges.length}`);
+      }
+
+      activeRuntime.setActiveId(activeRuntime.BUILTIN_ID);
+      await frame.contentWindow.KGWorkspace.deleteWorkspace(PACK_ID);
+      document.title = 'PASS: Systematization Compiled Pack';
+      status.textContent = 'PASS';
+    }
+
+    run().catch((error) => {
+      if (!document.title.startsWith('FAIL:')) {
+        document.title = `FAIL: ${error.message || error}`;
+        status.textContent = document.title;
+      }
+      console.error(error);
+    });
+  </script>
+</body>
+</html>
