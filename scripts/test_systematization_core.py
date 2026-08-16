@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import copy
 import json
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -78,18 +77,16 @@ class CompilerTests(unittest.TestCase):
         self.assertEqual(len(sidecar["sources"]), 7)
         self.assertNotIn("provenance", pack["graph"]["nodes"][0])
 
-    def test_rejected_proposal_is_not_compiled(self):
+    def test_rejecting_required_root_causes_safe_compile_failure(self):
         review = copy.deepcopy(self.review)
         review["decisions"][0]["decision"] = "reject"
-        pack, sidecar = compile_reviewed_draft(
-            self.draft,
-            review,
-            workspace_id="test-agent-harness-reject",
-            title="Test Agent Harness",
-        )
-        ids = {node["id"] for node in pack["graph"]["nodes"]}
-        self.assertNotIn("domain.agent-harness", ids)
-        # Removing the root causes contained edges to dangle, so compilation must fail before this assertion.
+        with self.assertRaisesRegex(ValueError, "Compiled Knowledge Pack is invalid"):
+            compile_reviewed_draft(
+                self.draft,
+                review,
+                workspace_id="test-agent-harness-reject",
+                title="Test Agent Harness",
+            )
 
     def test_unknown_review_proposal_is_rejected(self):
         review = copy.deepcopy(self.review)
