@@ -14,13 +14,48 @@ The long-term product thesis is broader than graph visualization:
 
 The canvas is a projection of a living knowledge model, not the product boundary. The near-term wedge is to systematize fragmented AI conversations and research into a reviewable Knowledge Pack, while preserving provenance and human control.
 
-The current repository is intended to remain the public representation/exploration foundation; proprietary product intelligence may live above it behind explicit Knowledge Pack and adapter contracts.
+The current repository is intended to remain the public representation/exploration foundation; proprietary product intelligence may live above it behind explicit Knowledge Pack and Systematizer contracts.
 
-See [`ADR-003: Product thesis, open foundation, and systematization architecture`](docs/ADR-003-product-thesis-open-core-and-systematization-architecture.md) for the strategic boundary, non-goals, metrics, and the falsifiable v0.4 experiment.
+See:
+
+- [`ADR-003: Product thesis, open foundation, and systematization architecture`](docs/ADR-003-product-thesis-open-core-and-systematization-architecture.md)
+- [`v0.4 Systematization Experiment`](docs/V0.4_SYSTEMATIZATION_EXPERIMENT.md)
+- [`Systematization Draft Contract`](docs/SYSTEMATIZATION_DRAFT_CONTRACT.md)
+- [`Systematizer Interface`](docs/SYSTEMATIZER_INTERFACE.md)
+- [`Systematization Evaluation`](docs/SYSTEMATIZATION_EVALUATION.md)
+
+### Public/private systematization boundary
+
+```text
+Public foundation
+  Markdown / conversation source
+          ↓
+     SourceAdapter
+          ↓
+   normalized fragments
+          ↓
+   Systematizer Request
+          │
+          │ explicit provider-neutral process contract
+          ▼
+Private / replaceable intelligence
+  model + prompts + orchestration
+          ↓
+   Draft Contract v0.1
+          ↓
+Public foundation
+  validate → evaluate → human review → compile
+          ↓
+   Knowledge Pack v1.0
+          ↓
+        Canvas
+```
+
+The public foundation does not require a provider SDK, API key, or proprietary prompt strategy. A concrete systematizer must return a reviewable Draft Contract; it never writes canonical knowledge directly.
 
 ## Product model
 
-The application is now separated from the data it renders:
+The application is separated from the data it renders:
 
 ```text
 Knowledge Graph App
@@ -76,6 +111,36 @@ Invalid packs are previewed with errors and **never written to IndexedDB**.
 
 Schema reference: [`docs/KNOWLEDGE_PACK_SCHEMA.md`](docs/KNOWLEDGE_PACK_SCHEMA.md).
 
+## v0.4 — Measurable systematization experiment
+
+v0.4 tests the harder thesis: can fragmented source material become a useful structured model with low correction cost and traceable provenance?
+
+Current verified pipeline:
+
+```text
+input.md
+  ↓
+SourceAdapter
+  ↓
+normalized fragments
+  ↓
+Systematizer boundary
+  ↓
+Draft Contract
+  ↓
+validation + benchmark evaluation
+  ↓
+human review
+  ↓
+PackCompiler
+  ↓
+Knowledge Pack + provenance sidecar
+  ↓
+existing browser runtime / canvas
+```
+
+The benchmark harness deliberately distinguishes gold/fixture self-tests from real model performance. Human correction rate and Time to Structured Understanding (TTSU) remain unmeasured until a genuine model run is reviewed by a human.
+
 ## Knowledge model
 
 Each pack keeps different concerns independent:
@@ -97,7 +162,11 @@ Each pack keeps different concerns independent:
 - Search, deep links, pan/zoom, Navigate/Edit interaction modes, collapse/expand and inspector
 - Responsive desktop/tablet/mobile shell and two-finger pinch zoom
 - Fullscreen canvas
-- Public System Design Overview and data-driven project changelog
+- Systematization Draft Contract v0.1 and deterministic evaluator
+- Stable Markdown SourceAdapter + reviewed-draft PackCompiler
+- Provenance sidecar that keeps Knowledge Pack v1.0 canonical data clean
+- Provider-neutral Systematizer process interface and reproducible run/config metadata
+- Frozen benchmark #001 with deterministic CI gates
 - Chromium browser regression gates before deployment
 
 ## Storage boundary
@@ -133,6 +202,8 @@ python scripts/validate_data.py
 python -m json.tool site/data/project-history.json > /dev/null
 python -m json.tool site/templates/minimal.kg.json > /dev/null
 python -m json.tool site/templates/example.kg.json > /dev/null
+python scripts/test_systematization_core.py -v
+python scripts/test_systematizer_interface.py -v
 node --check site/workspace-runtime.js
 node --check site/workspace-manager.js
 node --check site/app.js
@@ -144,20 +215,30 @@ Open `http://localhost:8080/site/`.
 
 ## Quality gates
 
-Pull requests and `main` deployments run:
+Pull requests and relevant `main` changes run:
 
 - graph/schema validation
 - Knowledge Pack template JSON validation
 - JavaScript syntax validation
 - runtime script-order checks
 - Chromium Deep Dive interaction smoke test
-- long-lived Chromium Knowledge Pack smoke test covering Workspace Manager UI, template preview, validation, IndexedDB persistence, custom graph reload, export, workspace-scoped inbox, switch-back, and cleanup
+- long-lived Chromium Knowledge Pack smoke test
+- mentorship pack browser smoke test
+- systematization draft/evaluator regression
+- deterministic SourceAdapter → review → PackCompiler pipeline verification
+- provider-neutral Systematizer process-contract verification
+- browser import/render smoke for a deterministically compiled systematization pack
 
-GitHub Pages deploys only after these gates pass.
+Fixture/gold benchmark runs verify the harness only; they are never reported as real model quality.
 
 ## Architecture documents
 
 - [`docs/KNOWLEDGE_PACK_SCHEMA.md`](docs/KNOWLEDGE_PACK_SCHEMA.md)
+- [`docs/SYSTEMATIZATION_DRAFT_CONTRACT.md`](docs/SYSTEMATIZATION_DRAFT_CONTRACT.md)
+- [`docs/SYSTEMATIZER_INTERFACE.md`](docs/SYSTEMATIZER_INTERFACE.md)
+- [`docs/SYSTEMATIZATION_EVALUATION.md`](docs/SYSTEMATIZATION_EVALUATION.md)
+- [`docs/V0.4_SYSTEMATIZATION_EXPERIMENT.md`](docs/V0.4_SYSTEMATIZATION_EXPERIMENT.md)
+- [`docs/V0.4_IMPLEMENTATION_BACKLOG.md`](docs/V0.4_IMPLEMENTATION_BACKLOG.md)
 - [`docs/ADR-001-zero-build-mvp.md`](docs/ADR-001-zero-build-mvp.md)
 - [`docs/ADR-002-canonical-graph-and-projections.md`](docs/ADR-002-canonical-graph-and-projections.md)
 - [`docs/ADR-003-product-thesis-open-core-and-systematization-architecture.md`](docs/ADR-003-product-thesis-open-core-and-systematization-architecture.md)
